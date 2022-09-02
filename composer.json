@@ -47,10 +47,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "ToneflixCode\\LaravelFileable\\LaravelFileableServiceProvider"
+                "ToneflixCode\\LaravelFileable\\FileableServiceProvider"
             ],
             "aliases": {
-                "LaravelFileable": "ToneflixCode\\LaravelFileable\\LaravelFileableFacade"
+                "LaravelFileable": "ToneflixCode\\LaravelFileable\\FileableFacade"
             }
         }
     }
