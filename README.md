@@ -2,7 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/toneflix-code/laravel-fileable.svg?style=flat-round)](https://packagist.org/packages/toneflix-code/laravel-fileable)
 [![Total Downloads](https://img.shields.io/packagist/dt/toneflix-code/laravel-fileable.svg?style=flat-round)](https://packagist.org/packages/toneflix-code/laravel-fileable)
-![GitHub Actions](https://github.com/toneflix-code/laravel-fileable/actions/workflows/main.yml/badge.svg)
+![GitHub Actions](https://github.com/toneflix/laravel-fileable/actions/workflows/main.yml/badge.svg)
 
 Laravel Fileable exposes methods that make handling file upload with Laravel filesystem even easier, it also exposes a trait that automatically handles file uploads for you.
 
