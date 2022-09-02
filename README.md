@@ -89,24 +89,24 @@ class User extends Model
 The `imageableLoader()` method accepts and array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
 
 ```php
-    $this->imageableLoader([
-        'avatar' => 'avatar',
-    ]);
+$this->imageableLoader([
+    'avatar' => 'avatar',
+]);
 ```
 
 OR
 
 ```php
-    $this->imageableLoader([
-        'avatar' => 'avatar',
-        'image' => 'default',
-    ]);
+$this->imageableLoader([
+    'avatar' => 'avatar',
+    'image' => 'default',
+]);
 ```
 
 The `imageableLoader()` method also accepts the `key` as a string as the first parameter and the `value` as a string as the second parameter.
 
 ```php
-    $this->imageableLoader('avatar', 'default');
+$this->imageableLoader('avatar', 'default');
 ```
 
 ### Model Events
@@ -116,12 +116,12 @@ If you use listen to laravel events via the `boot()` you would need to move your
 This should be defined in your model to overide the default handles.
 
 ```php
-    public static function registerEvents()
-    {
-        static::creating(function ($item) {
-            $item->slug = str($item->title)->slug();
-        });
-    }
+public static function registerEvents()
+{
+    static::creating(function ($item) {
+        $item->slug = str($item->title)->slug();
+    });
+}
 ```
 
 ### Testing
