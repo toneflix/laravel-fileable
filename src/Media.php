@@ -143,29 +143,4 @@ class Media
 
         return $path;
     }
-
-    public function downloadVcard($vcard, ?bool $check = false): string|bool|array
-    {
-        $file_name = 'vcards/'.$vcard->title.'.vcf';
-
-        if ($check === true) {
-            if (Storage::exists($file_name)) {
-                return true;
-            }
-        } elseif (Storage::exists($file_name)) {
-            $vcard->processing = 'contact';
-            $vcard->saveStat(['downloads']);
-            if (request()->expectsJson()) {
-                $user = Auth::user();
-                $user->window_token = $this->generate_string(55, 2);
-                $user->save();
-
-                return ['link' => route('vcards.download.now', ['vcard' => $vcard->slug, 'sut' => $user->window_token])];
-            }
-
-            return Storage::path($file_name);
-        }
-
-        return ['message' => __('This Vcard may have expired or is not yest available for download.')];
-    }
 }
