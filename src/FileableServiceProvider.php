@@ -17,20 +17,17 @@ class FileableServiceProvider extends ServiceProvider
     public function boot()
     {
         config([
-            'filesystems' =>
+            'filesystems.links' =>
                 collect(config('filesystems.links'))
                 ->merge(config('toneflix-fileable.symlinks', []))
                 ->toArray(),
         ]);
 
         config([
-            'imagecache' => [
-                'paths' =>
-                    collect(config('imagecache.paths'))
-                    ->merge(collect(config('toneflix-fileable.symlinks', []))->values())
-                    ->merge(collect(config('toneflix-fileable.symlinks', []))->keys())
-                    ->toArray()
-            ]
+            'imagecache.paths' => collect(config('imagecache.paths'))
+                ->merge(collect(config('toneflix-fileable.symlinks', []))->values())
+                ->merge(collect(config('toneflix-fileable.symlinks', []))->keys())
+                ->toArray()
         ]);
 
         /*
