@@ -24,6 +24,7 @@ class FileableServiceProvider extends ServiceProvider
         ]);
 
         config([
+            'imagecache.route' => config('imagecache.route', 'images/responsive'),
             'imagecache.paths' => collect(config('imagecache.paths'))
                 ->merge(collect(config('toneflix-fileable.symlinks', []))->values())
                 ->merge(collect(config('toneflix-fileable.symlinks', []))->keys())
