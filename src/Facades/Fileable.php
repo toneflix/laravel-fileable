@@ -3,6 +3,7 @@
 namespace ToneflixCode\LaravelFileable\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use ToneflixCode\LaravelFileable\Media;
 
 /**
  * @see \ToneflixCode\FileableFacade\Skeleton\SkeletonClass
@@ -16,6 +17,6 @@ class Fileable extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'fileable';
+        return Media::class;
     }
 }

@@ -21,7 +21,7 @@ class Media
 
     public function __construct()
     {
-        $this->namespaces = config('toneflix-fileable.namespaces');
+        $this->namespaces = config('toneflix-fileable.collections');
         $this->globalDefault = true;
         $this->imageDriver = new ImageManager(['driver' => 'gd']);
     }

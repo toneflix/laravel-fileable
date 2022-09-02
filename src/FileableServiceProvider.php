@@ -18,8 +18,8 @@ class FileableServiceProvider extends ServiceProvider
     {
         config([
             'filesystems' =>
-                collect(config('filesystems'))
-                ->merge(config('toneflix-fileable.filesystems'))
+                collect(config('filesystems.links'))
+                ->merge(config('toneflix-fileable.symlinks', []))
                 ->toArray(),
         ]);
 
@@ -27,7 +27,9 @@ class FileableServiceProvider extends ServiceProvider
             'imagecache' => [
                 'paths' =>
                     collect(config('imagecache.paths'))
-                    ->merge(collect(config('toneflix-fileable.filesystems.links'))->values())->toArray()
+                    ->merge(collect(config('toneflix-fileable.symlinks', []))->values())
+                    ->merge(collect(config('toneflix-fileable.symlinks', []))->keys())
+                    ->toArray()
             ]
         ]);
 

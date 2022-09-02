@@ -24,7 +24,7 @@ trait Fileable
     {
         parent::__construct($attributes);
         $this->sizes = config('toneflix-fileable.image_sizes');
-        $this->registerImageable();
+        $this->registerFileable();
     }
 
     public static function boot()
@@ -123,19 +123,19 @@ trait Fileable
      *
      * @return void
      */
-    public function registerImageable(): void
+    public function registerFileable(): void
     {
-        $this->imageableLoader('file', 'default');
+        $this->fileableLoader('file', 'default');
     }
 
     /**
-     * All imageable properties should be registered
+     * All fileable properties should be registered
      *
      * @param  string|array  $file_name   filename | [filename => collection]
      * @param  string  $collection
      * @return void
      */
-    public function imageableLoader(string|array $file_name = 'file', string $collection = 'default')
+    public function fileableLoader(string|array $file_name = 'file', string $collection = 'default')
     {
         if (is_array($file_name)) {
             foreach ($file_name as $file => $collection) {
