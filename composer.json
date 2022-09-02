@@ -50,7 +50,7 @@
                 "ToneflixCode\\LaravelFileable\\FileableServiceProvider"
             ],
             "aliases": {
-                "LaravelFileable": "ToneflixCode\\LaravelFileable\\FileableFacade"
+                "LaravelFileable": "ToneflixCode\\LaravelFileable\\Facades\\Fileable"
             }
         }
     }

@@ -1,13 +1,13 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable;
+namespace ToneflixCode\LaravelFileable\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @see \ToneflixCode\FileableFacade\Skeleton\SkeletonClass
  */
-class FileableFacade extends Facade
+class Fileable extends Facade
 {
     /**
      * Get the registered name of the component.
