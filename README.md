@@ -124,6 +124,48 @@ public static function registerEvents()
 }
 ```
 
+### Model Attributes
+
+Laravel Fileable exposes 3 model Attributes which will help with accessing your saved files
+
+#### defaultImage()
+
+This attribute exposes the default image of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+
+Depending on the collections you have created, you may need to add the default image file to the respective directories within the collections.
+
+```php
+$post = Post::first();
+var_dump($post->default_image);
+```
+
+#### images()
+
+This attribute exposes all images registered with the `imageableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+
+```php
+$user = User::first();
+var_dump($user->images);
+var_dump($user->images['avatar']);
+
+$post = Post::first();
+var_dump($post->images['image']);
+```
+
+#### responsiveImages()
+
+This attribute exposes all responsive images generated for images registered with the `imageableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+
+```php
+$user = User::first();
+var_dump($user->responsive_images);
+var_dump($user->responsive_images['avatar']);
+
+$post = Post::first();
+var_dump($post->responsive_images['image']);
+var_dump($post->responsive_images['banner']);
+```
+
 ### Testing
 
 ```bash
