@@ -73,6 +73,10 @@ The `file_route_secure_middleware` config option sets which middleware to apply 
 
 The `symlinks` option maps where [Intervention Imagecache](https://github.com/Intervention/imagecache) should search for images in your app, this does not overide your current [Intervention Imagecache](https://github.com/Intervention/imagecache) configuration, it appends. 
 
+### Image Templates
+
+The `image_templates` option generates image filters based on [Intervention Imagecache](https://github.com/Intervention/imagecache) templates, this also does not overide your current [Intervention Imagecache](https://github.com/Intervention/imagecache) configuration, it appends. 
+
 ## Usage
 
 To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required imageables using the `imageableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
