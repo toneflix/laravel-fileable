@@ -4,6 +4,7 @@ namespace ToneflixCode\LaravelFileable\Traits;
 
 use ToneflixCode\LaravelFileable\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Arr;
 
 /**
  * A collection of usefull model manipulation classes.
@@ -139,13 +140,25 @@ trait Fileable
     {
         if (is_array($file_name)) {
             foreach ($file_name as $file => $collection) {
-                if (! in_array($collection, array_keys((new Media)->namespaces))) {
+                if (is_array($collection)) {
+                    throw new \ErrorException("Your collection should be a string");
+                }
+
+                $collect = Arr::get((new Media)->namespaces, $collection);
+
+                if (! in_array($collection, array_keys((new Media)->namespaces)) && !$collect) {
                     throw new \ErrorException("$collection is not a valid collection");
                 }
             }
         }
 
-        if (! in_array($collection, array_keys((new Media)->namespaces))) {
+        if (is_array($collection)) {
+            throw new \ErrorException("Your collection should be a string");
+        }
+
+        $collect = Arr::get((new Media)->namespaces, $collection);
+
+        if (! in_array($collection, array_keys((new Media)->namespaces)) && !$collect) {
             throw new \ErrorException("$collection is not a valid collection");
         }
 

@@ -41,6 +41,10 @@ return [
         'lg' => '720',
         'xl' => '1080',
     ],
+    'secure_file_middleware' => null,
+    'secure_file_route' => 'secure/files/{file}',
+    'image_templates' => [
+    ],
     'symlinks' => [
         public_path('avatars') => storage_path('app/public/avatars'),
         public_path('media') => storage_path('app/public/media'),

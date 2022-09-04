@@ -3,7 +3,6 @@
 namespace ToneflixCode\LaravelFileable;
 
 use Illuminate\Support\ServiceProvider;
-
 use ToneflixCode\LaravelFileable\Intervention\Media1080;
 use ToneflixCode\LaravelFileable\Intervention\Media431;
 use ToneflixCode\LaravelFileable\Intervention\Media694;
@@ -16,6 +15,8 @@ class FileableServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
+
         config([
             'filesystems.links' =>
                 collect(config('filesystems.links'))
@@ -28,7 +29,16 @@ class FileableServiceProvider extends ServiceProvider
             'imagecache.paths' => collect(config('imagecache.paths'))
                 ->merge(collect(config('toneflix-fileable.symlinks', []))->values())
                 ->merge(collect(config('toneflix-fileable.symlinks', []))->keys())
-                ->toArray()
+                ->toArray(),
+            'imagecache.templates' => collect(config('imagecache.templates'))
+                ->union(config('toneflix-fileable.image_templates', []))
+                ->union([
+                    '431' => Media431::class,
+                    '694' => Media694::class,
+                    '720' => Media720::class,
+                    '1080' => Media1080::class,
+                    '1080' => Media1080::class,
+                ]),
         ]);
 
         /*

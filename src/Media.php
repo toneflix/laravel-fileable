@@ -2,17 +2,13 @@
 
 namespace ToneflixCode\LaravelFileable;
 
-use App\Traits\Meta;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 
 class Media
 {
-    use Meta;
-
     public $globalDefault = false;
 
     public $default_media = 'media/default.png';
@@ -57,7 +53,7 @@ class Media
         }
 
         if (str($type)->contains('private.')) {
-            return route('get.image', ['file' => base64url_encode($getPath.$src)]);
+            return route('fileable.secure.file', ['file' => base64url_encode($getPath.$src)]);
         }
 
         return asset($getPath.$src);
