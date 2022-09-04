@@ -53,7 +53,8 @@ class Media
         }
 
         if (str($type)->contains('private.')) {
-            return route('fileable.secure.file', ['file' => base64url_encode($getPath.$src)]);
+            $secure = Arr::get($this->namespaces, $type.'.secure', false) === true ? 'secure' : 'open';
+            return route("fileable.{$secure}.file", ['file' => base64url_encode($getPath.$src)]);
         }
 
         return asset($getPath.$src);

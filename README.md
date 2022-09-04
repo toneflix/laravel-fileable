@@ -57,13 +57,17 @@ The `collection` config option define where files should be stored and optionall
 
 This package uses [Intervention Imagecache](https://github.com/Intervention/imagecache) to generate responsive images for image files on demand, the `image_sizes` config option defines which responsive sizes to generate, you are not limited to use the defined sizes, take a look at [Intervention Imagecache Documentation](https://image.intervention.io/v2/usage/cache) for information about customizsing this feature.
 
-### Secure File Route
+### File Route Secure
 
-The `secure_file_route` config option sets the route from which secure images should be loaded from. The route accepts one parameter, the `{file}` parameter.
+The `file_route_secure` config option sets the route from which secure images should be loaded from. The route accepts one parameter, the `{file}` parameter.
+
+### File Route Open
+
+The `file_route_open` config option sets the route from which secure images which do not require authentication or authorization should be loaded from. The route accepts one parameter, the `{file}` parameter.
 
 ### Secure File Middleware
 
-The `secure_file_middleware` config option sets which middleware to apply when using the protected files collection.
+The `file_route_secure_middleware` config option sets which middleware to apply when using the protected files collection.
 
 ### Symlinks
 

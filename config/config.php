@@ -24,13 +24,16 @@ return [
         'private' => [
             'files' => [
                 'path' => 'files/',
+                'secure' => false
             ],
             'images' => [
                 'path' => 'files/images/',
                 'default' => 'default.png',
+                'secure' => true
             ],
             'videos' => [
                 'path' => 'files/videos/',
+                'secure' => true
             ],
         ],
     ],
@@ -41,8 +44,9 @@ return [
         'lg' => '720',
         'xl' => '1080',
     ],
-    'secure_file_middleware' => null,
-    'secure_file_route' => 'secure/files/{file}',
+    'file_route_secure_middleware' => 'window_auth',
+    'file_route_secure' => 'secure/files/{file}',
+    'file_route_open' => 'open/files/{file}',
     'image_templates' => [
     ],
     'symlinks' => [
