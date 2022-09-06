@@ -2,6 +2,8 @@
 
 namespace ToneflixCode\LaravelFileable;
 
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use ToneflixCode\LaravelFileable\Intervention\Media1080;
 use ToneflixCode\LaravelFileable\Intervention\Media431;
@@ -29,6 +31,9 @@ class FileableServiceProvider extends ServiceProvider
             'imagecache.paths' => collect(config('imagecache.paths'))
                 ->merge(collect(config('toneflix-fileable.symlinks', []))->values())
                 ->merge(collect(config('toneflix-fileable.symlinks', []))->keys())
+                ->merge(Initiator::collectionPaths())
+                ->unique()
+                ->values()
                 ->toArray(),
             'imagecache.templates' => collect(config('imagecache.templates'))
                 ->union(config('toneflix-fileable.image_templates', []))
