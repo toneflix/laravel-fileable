@@ -79,7 +79,7 @@ The `image_templates` option generates image filters based on [Intervention Imag
 
 ## Usage
 
-To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required imageables using the `imageableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
+To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required filables using the `fileableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
 
 ```php
 namespace App\Models;
@@ -92,9 +92,9 @@ class User extends Model
 {
     use HasFactory, Fileable;
 
-    public function registerImageable()
+    public function registerFileable()
     {
-        $this->imageableLoader([
+        $this->fileableLoader([
             'avatar' => 'default',
         ]);
     }
@@ -102,10 +102,10 @@ class User extends Model
 
 ```
 
-The `imageableLoader()` method accepts and array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
+The `fileableLoader()` method accepts and array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
 
 ```php
-$this->imageableLoader([
+$this->fileableLoader([
     'avatar' => 'avatar',
 ]);
 ```
@@ -113,16 +113,16 @@ $this->imageableLoader([
 OR
 
 ```php
-$this->imageableLoader([
+$this->fileableLoader([
     'avatar' => 'avatar',
     'image' => 'default',
 ]);
 ```
 
-The `imageableLoader()` method also accepts the `key` as a string as the first parameter and the `value` as a string as the second parameter.
+The `fileableLoader()` method also accepts the `key` as a string as the first parameter and the `value` as a string as the second parameter.
 
 ```php
-$this->imageableLoader('avatar', 'default');
+$this->fileableLoader('avatar', 'default');
 ```
 
 ### Model Events
@@ -157,7 +157,7 @@ var_dump($post->default_image);
 
 #### images()
 
-This attribute exposes all images registered with the `imageableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+This attribute exposes all images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
 
 ```php
 $user = User::first();
@@ -170,7 +170,7 @@ var_dump($post->images['image']);
 
 #### responsiveImages()
 
-This attribute exposes all responsive images generated for images registered with the `imageableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+This attribute exposes all responsive images generated for images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
 
 ```php
 $user = User::first();
