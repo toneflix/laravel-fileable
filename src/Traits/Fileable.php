@@ -70,7 +70,7 @@ trait Fileable
 
                     return $images;
                 } else {
-                    return [$this->file_name] = $this->retrieveImage($this->file_name, $this->collection);
+                    return [$this->file_name => $this->retrieveImage($this->file_name, $this->collection)];
                 }
             },
         );
