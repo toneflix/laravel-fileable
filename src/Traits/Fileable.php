@@ -5,17 +5,21 @@ namespace ToneflixCode\LaravelFileable\Traits;
 use ToneflixCode\LaravelFileable\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * A collection of usefull model manipulation classes.
  */
 trait Fileable
 {
+    public $namespaces;
+
     public array $sizes;
 
     public string $collection = 'image';
 
     public string|array $file_name = 'file';
+
 
     public static string $static_collection = 'image';
 
@@ -25,6 +29,7 @@ trait Fileable
     {
         parent::__construct($attributes);
         $this->sizes = config('toneflix-fileable.image_sizes');
+        $this->namespaces = config('toneflix-fileable.collections');
         $this->registerFileable();
     }
 
@@ -42,7 +47,7 @@ trait Fileable
                 });
 
                 static::deleting(function ($item) use ($file, $collection) {
-                    $item->removeImage($file, $collection);
+                    $item->removeFile($file, $collection);
                 });
             }
 
@@ -53,11 +58,16 @@ trait Fileable
             });
 
             static::deleting(function ($item) {
-                $item->removeImage(self::$static_file_name, self::$static_collection);
+                $item->removeFile(self::$static_file_name, self::$static_collection);
             });
         }
     }
 
+    /**
+     *  Returns a list of all bound files.
+     *
+     * @deprecated  1.0.0    Use files instead, will be removed from future versions
+    */
     public function images(): Attribute
     {
         return new Attribute(
@@ -65,12 +75,33 @@ trait Fileable
                 if (is_array($this->file_name)) {
                     $images = [];
                     foreach ($this->file_name as $file => $collection) {
-                        $images[$file] = $this->retrieveImage($file, $collection);
+                        $images[$file] = $this->retrieveFile($file, $collection);
                     }
 
                     return $images;
                 } else {
-                    return [$this->file_name => $this->retrieveImage($this->file_name, $this->collection)];
+                    return [$this->file_name => $this->retrieveFile($this->file_name, $this->collection)];
+                }
+            },
+        );
+    }
+
+    /**
+     *  Returns a list of all bound files.
+    */
+    public function files(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                if (is_array($this->file_name)) {
+                    $files = [];
+                    foreach ($this->file_name as $file => $collection) {
+                        $files[$file] = $this->retrieveFile($file, $collection);
+                    }
+
+                    return $files;
+                } else {
+                    return [$this->file_name => $this->retrieveFile($this->file_name, $this->collection)];
                 }
             },
         );
@@ -91,7 +122,16 @@ trait Fileable
                     $images = [];
                     foreach ($this->file_name as $file => $collection) {
                         $images[$file] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($file, $collection) {
-                            $asset = pathinfo($this->retrieveImage($file, $collection), PATHINFO_BASENAME);
+                            $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
+
+                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($file, $collection, true)))
+                                        ->contains('image');
+
+                            if (!$isImage) {
+                                return [$key => $this->default_image];
+                            }
+
+                            $asset = pathinfo($this->retrieveFile($file, $collection), PATHINFO_BASENAME);
 
                             return [$key => route('imagecache', [$size, $asset])];
                         });
@@ -100,7 +140,15 @@ trait Fileable
                     return $images;
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
-                        $asset = pathinfo($this->retrieveImage($this->file_name, $this->collection), PATHINFO_BASENAME);
+                        $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
+                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_name, $this->collection, true)))
+                                    ->contains('image');
+
+                        if (!$isImage) {
+                            return [$key => $this->default_image];
+                        }
+
+                        $asset = pathinfo($this->retrieveFile($this->file_name, $this->collection), PATHINFO_BASENAME);
 
                         return [$key = route('imagecache', [$size, $asset])];
                     });
@@ -195,10 +243,15 @@ trait Fileable
      *
      * @param  string  $file_name
      * @param  string  $collection
+     * @param  bool  $getPath
      */
-    public function retrieveImage(string $file_name = 'file', string $collection = 'default')
+    public function retrieveFile(string $file_name = 'file', string $collection = 'default', bool $returnPath = false)
     {
-        return (new Media)->image($collection, $this->{$file_name}, $this->default_image);
+        if ($this->{$file_name}) {
+            return (new Media)->getMedia($collection, $this->{$file_name}, $returnPath);
+        }
+
+        return null;
     }
 
     /**
@@ -207,7 +260,7 @@ trait Fileable
      * @param  string|array  $file_name
      * @param  string  $collection
      */
-    public function removeImage(string|array $file_name = null, string $collection = 'default')
+    public function removeFile(string|array $file_name = null, string $collection = 'default')
     {
         $file_name = $file_name ?? $this->file_name;
         if (is_array($file_name)) {
