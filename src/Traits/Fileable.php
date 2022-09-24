@@ -87,6 +87,39 @@ trait Fileable
     }
 
     /**
+     *  Returns a list of file types for all bound files.
+    */
+    public function fileTypes(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                if (is_array($this->file_name)) {
+                    $files = [];
+                    foreach ($this->file_name as $file => $collection) {
+                        $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
+
+                        $mime = Storage::mimeType($file_path = $prefix . $this->retrieveFile($file, $collection, true));
+                        $isImage = str($mime)->contains('image');
+                        $file_url = $this->retrieveFile($file, $collection);
+
+                        $files[$file] = ['mime' => $mime, 'isImage' => $isImage, 'path' => $file_path, 'url' => $file_url];
+                    }
+
+                    return $files;
+                } else {
+                    $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
+
+                    $mime = Storage::mimeType($file_path = $prefix . $this->retrieveFile($this->file, $this->collection, true));
+                    $isImage = str($mime)->contains('image');
+
+                    $file_url = $this->retrieveFile($this->file_name, $this->collection);
+                    return [$this->file_name => ['mime' => $mime, 'isImage' => $isImage, 'path' => $file_path, 'url' => $file_url]];
+                }
+            },
+        );
+    }
+
+    /**
      *  Returns a list of all bound files.
     */
     public function files(): Attribute
