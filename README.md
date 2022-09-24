@@ -155,22 +155,32 @@ $post = Post::first();
 var_dump($post->default_image);
 ```
 
-#### images()
+#### getFiles()
+
+Returns a list of bound files with a little more details like mime, isImage, url, path and size
+
+```php
+$post = Post::first();
+var_dump($post->get_files);
+var_dump($user->get_files['image']);
+```
+
+#### files()
 
 This attribute exposes all images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
 
 ```php
 $user = User::first();
-var_dump($user->images);
-var_dump($user->images['avatar']);
+var_dump($user->files);
+var_dump($user->files['avatar']);
 
 $post = Post::first();
-var_dump($post->images['image']);
+var_dump($post->files['image']);
 ```
 
 #### responsiveImages()
 
-This attribute exposes all responsive images generated for images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+If the registered files are images his attribute exposes responsive images for them or returns the defual image
 
 ```php
 $user = User::first();
