@@ -87,9 +87,9 @@ trait Fileable
     }
 
     /**
-     *  Returns a list of file types for all bound files.
+     *  Returns a list of bound files with a little more detal.
     */
-    public function fileTypes(): Attribute
+    public function getFiles(): Attribute
     {
         return new Attribute(
             get: function () {
