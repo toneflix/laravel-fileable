@@ -23,13 +23,26 @@ class Media
     }
 
     /**
-     * Fetch an image from the storage
+     * Fetch an file from the storage
+     *
+     * @param  string  $type
+     * @param  string  $src
+     * @return string
+     * @deprecated 1.1.0 Use getMedia() instead.
+     */
+    public function image(string $type, string $src = null): string|null
+    {
+        return $this->getMedia($type, $src);
+    }
+
+    /**
+     * Fetch an file from the storage
      *
      * @param  string  $type
      * @param  string  $src
      * @return string
      */
-    public function image(string $type, string $src = null): string|null
+    public function getMedia(string $type, string $src = null, $returnPath = false): string|null
     {
         $getPath = Arr::get($this->namespaces, $type.'.path');
         $default = Arr::get($this->namespaces, $type.'.default');
@@ -39,17 +52,34 @@ class Media
             $port = parse_url($src, PHP_URL_PORT);
             $url = str($src)->replace('localhost:'.$port, 'localhost');
 
+            if ($returnPath === true) {
+                return parse_url($src, PHP_URL_PATH);
+            }
             return $url->replace('localhost', request()->getHttpHost());
         }
 
         if (! $src || ! Storage::exists($prefix.$getPath.$src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
+
+                if ($returnPath === true) {
+                    return parse_url($default, PHP_URL_PATH);
+                }
+
                 return $default;
-            } elseif (! Storage::exists($prefix.$getPath.$default)) {
+            } elseif (! Storage::exists($prefix . $getPath . $default)) {
+
+                if ($returnPath === true) {
+                    return $this->default_media;
+                }
+
                 return asset($this->default_media);
             }
 
-            return asset($getPath.$default);
+            if ($returnPath === true) {
+                return $getPath . $default;
+            }
+
+            return asset($getPath . $default);
         }
 
         if (str($type)->contains('private.')) {
@@ -57,7 +87,12 @@ class Media
             return route("fileable.{$secure}.file", ['file' => base64url_encode($getPath.$src)]);
         }
 
-        return asset($getPath.$src);
+
+        if ($returnPath === true) {
+            return $getPath . $src;
+        }
+
+        return asset($getPath . $src);
     }
 
     public function privateFile($file)
@@ -80,7 +115,7 @@ class Media
     }
 
     /**
-     * Fetch an image from the storage
+     * Fetch a file from the storage
      *
      * @param  string  $type
      * @param  string  $file_name
@@ -107,9 +142,10 @@ class Media
             $request->offsetUnset($file_name);
 
             // Resize the image
+            $mime = Storage::mimeType($prefix . $getPath . $rename);
             $size = Arr::get($this->namespaces, $type.'.size');
-            if ($size) {
-                $this->imageDriver->make(storage_path('app/'.$prefix.$getPath.$rename))
+            if ($size && str($mime)->contains('image')) {
+                $this->imageDriver->make(storage_path('app/' . $prefix . $getPath . $rename))
                     ->fit($size[0], $size[1])
                     ->save();
             }
@@ -121,7 +157,7 @@ class Media
     }
 
     /**
-     * Delete an image from the storage
+     * Delete a file from the storage
      *
      * @param  string  $type
      * @param  string  $src
