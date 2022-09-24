@@ -168,36 +168,36 @@ trait Fileable
                     $files = [];
                     foreach ($this->file_name as $file => $collection) {
                         $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
+                        $file_path = $prefix . $this->retrieveFile($file, $collection, true);
 
-                        $mime = Storage::mimeType($file_path = $prefix . $this->retrieveFile($file, $collection, true));
-                        $size = Storage::size($file_path = $prefix . $this->retrieveFile($file, $collection, true));
+                        $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
                         $isImage = str($mime)->contains('image');
                         $file_url = $this->retrieveFile($file, $collection);
 
                         $files[$file] = [
-                            'mime' => $mime,
                             'isImage' => $isImage,
                             'path' => $file_path,
                             'url' => $file_url,
-                            'size' => $size
+                            'mime' => $mime,
+                            'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
                         ];
                     }
 
                     return $files;
                 } else {
                     $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
+                    $file_path = $prefix . $this->retrieveFile($this->file_name, $this->collection, true);
 
-                    $mime = Storage::mimeType($file_path = $prefix . $this->retrieveFile($this->file, $this->collection, true));
-                    $size = Storage::size($file_path = $prefix . $this->retrieveFile($this->file, $this->collection, true));
+                    $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
                     $isImage = str($mime)->contains('image');
 
                     $file_url = $this->retrieveFile($this->file_name, $this->collection);
                     return [$this->file_name => [
-                        'mime' => $mime,
                         'isImage' => $isImage,
                         'path' => $file_path,
                         'url' => $file_url,
-                        'size' => $size
+                        'mime' => $mime,
+                        'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
                     ]];
                 }
             },
