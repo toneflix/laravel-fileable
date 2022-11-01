@@ -2,6 +2,7 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/toneflix-code/laravel-fileable.svg?style=flat-round)](https://packagist.org/packages/toneflix-code/laravel-fileable)
 [![Total Downloads](https://img.shields.io/packagist/dt/toneflix-code/laravel-fileable.svg?style=flat-round)](https://packagist.org/packages/toneflix-code/laravel-fileable)
+
 <!-- ![GitHub Actions](https://github.com/toneflix/laravel-fileable/actions/workflows/main.yml/badge.svg) -->
 
 Laravel Fileable exposes methods that make handling file upload with Laravel filesystem even easier, it also exposes a trait that automatically handles file uploads for you.
@@ -37,7 +38,7 @@ You may change this or decide to modify the directories that will be created by 
 
 ```bash
 php artisan vendor:publish --provider="ToneflixCode\LaravelFileable\FileableServiceProvider"
-``` 
+```
 
 The configuration file is copied to config/toneflix-fileable.php. With this copy you can alter the settings for your application locally.
 
@@ -47,7 +48,7 @@ After publishing and modifying the configuration, both of which are optional you
 
 ```bash
 php artisan storage:link
-``` 
+```
 
 ### Collections
 
@@ -71,15 +72,15 @@ The `file_route_secure_middleware` config option sets which middleware to apply 
 
 ### Symlinks
 
-The `symlinks` option maps where [Intervention Imagecache](https://github.com/Intervention/imagecache) should search for images in your app, this does not overide your current [Intervention Imagecache](https://github.com/Intervention/imagecache) configuration, it appends. 
+The `symlinks` option maps where [Intervention Imagecache](https://github.com/Intervention/imagecache) should search for images in your app, this does not overide your current [Intervention Imagecache](https://github.com/Intervention/imagecache) configuration, it appends.
 
 ### Image Templates
 
-The `image_templates` option generates image filters based on [Intervention Imagecache](https://github.com/Intervention/imagecache) templates, this also does not overide your current [Intervention Imagecache](https://github.com/Intervention/imagecache) configuration, it appends. 
+The `image_templates` option generates image filters based on [Intervention Imagecache](https://github.com/Intervention/imagecache) templates, this also does not overide your current [Intervention Imagecache](https://github.com/Intervention/imagecache) configuration, it appends.
 
 ## Usage
 
-To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required imageables using the `imageableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
+To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required imageables using the `fileableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
 
 ```php
 namespace App\Models;
@@ -92,9 +93,9 @@ class User extends Model
 {
     use HasFactory, Fileable;
 
-    public function registerImageable()
+    public function registerFileable()
     {
-        $this->imageableLoader([
+        $this->fileableLoader([
             'avatar' => 'default',
         ]);
     }
@@ -102,10 +103,10 @@ class User extends Model
 
 ```
 
-The `imageableLoader()` method accepts and array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
+The `fileableLoader()` method accepts and array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
 
 ```php
-$this->imageableLoader([
+$this->fileableLoader([
     'avatar' => 'avatar',
 ]);
 ```
@@ -113,16 +114,16 @@ $this->imageableLoader([
 OR
 
 ```php
-$this->imageableLoader([
+$this->fileableLoader([
     'avatar' => 'avatar',
     'image' => 'default',
 ]);
 ```
 
-The `imageableLoader()` method also accepts the `key` as a string as the first parameter and the `value` as a string as the second parameter.
+The `fileableLoader()` method also accepts the `key` as a string as the first parameter and the `value` as a string as the second parameter.
 
 ```php
-$this->imageableLoader('avatar', 'default');
+$this->fileableLoader('avatar', 'default');
 ```
 
 ### Model Events
@@ -155,22 +156,48 @@ $post = Post::first();
 var_dump($post->default_image);
 ```
 
-#### images()
+#### files()
 
-This attribute exposes all images registered with the `imageableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+This attribute exposes all files registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
 
 ```php
 $user = User::first();
-var_dump($user->images);
-var_dump($user->images['avatar']);
+var_dump($user->files);
+var_dump($user->files['avatar']);
 
 $post = Post::first();
-var_dump($post->images['image']);
+var_dump($post->files['image']);
+```
+
+#### getFiles()
+
+This attribute exposes all files registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait with usefull metadata.
+
+Available properties in in this attribute include:
+
+1. **_isImage_** This property will indicate is the current file is an image file.
+2. **path** returns the absolute path to the current file.
+3. **url** returns the absolute url to the current file.
+4. **mime** returns the mimetype for the current file.
+5. **size** returns the file size of the current file in bytes.
+
+```php
+$user = User::first();
+var_dump($user->get_files);
+var_dump($user->get_files['avatar']);
+var_dump($user->get_files['avatar']['isImage']);
+var_dump($user->get_files['avatar']['size']);
+var_dump($user->get_files['avatar']['path']);
+
+$post = Post::first();
+var_dump($post->get_files['image']);
+var_dump($post->get_files['image']['url']);
+var_dump($post->get_files['image']['mime']);
 ```
 
 #### responsiveImages()
 
-This attribute exposes all responsive images generated for images registered with the `imageableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+This attribute exposes all responsive images generated for images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
 
 ```php
 $user = User::first();
@@ -202,8 +229,8 @@ If you discover any security related issues, please email code@toneflix.com.ng i
 
 ## Credits
 
--   [Toneflix Code](https://github.com/toneflix)
--   [All Contributors](../../contributors)
+- [Toneflix Code](https://github.com/toneflix)
+- [All Contributors](../../contributors)
 
 ## License
 
