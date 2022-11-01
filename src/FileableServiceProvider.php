@@ -2,8 +2,6 @@
 
 namespace ToneflixCode\LaravelFileable;
 
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use ToneflixCode\LaravelFileable\Intervention\Media1080;
 use ToneflixCode\LaravelFileable\Intervention\Media431;
@@ -20,8 +18,7 @@ class FileableServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
 
         config([
-            'filesystems.links' =>
-                collect(config('filesystems.links'))
+            'filesystems.links' => collect(config('filesystems.links'))
                 ->merge(config('toneflix-fileable.symlinks', []))
                 ->toArray(),
         ]);

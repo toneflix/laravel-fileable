@@ -24,16 +24,16 @@ return [
         'private' => [
             'files' => [
                 'path' => 'files/',
-                'secure' => false
+                'secure' => false,
             ],
             'images' => [
                 'path' => 'files/images/',
                 'default' => 'default.png',
-                'secure' => true
+                'secure' => true,
             ],
             'videos' => [
                 'path' => 'files/videos/',
-                'secure' => true
+                'secure' => true,
             ],
         ],
     ],
@@ -52,5 +52,5 @@ return [
     'symlinks' => [
         public_path('avatars') => storage_path('app/public/avatars'),
         public_path('media') => storage_path('app/public/media'),
-    ]
+    ],
 ];
