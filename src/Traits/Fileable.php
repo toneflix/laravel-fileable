@@ -22,7 +22,6 @@ trait Fileable
 
     protected bool $applyDefault = false;
 
-
     public static string $static_collection = 'image';
 
     public static string|array $static_file_name = 'file';

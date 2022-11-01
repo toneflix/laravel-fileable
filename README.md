@@ -80,7 +80,11 @@ The `image_templates` option generates image filters based on [Intervention Imag
 
 ## Usage
 
+<<<<<<< HEAD
 To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required imageables using the `fileableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
+=======
+To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required filables using the `fileableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
+>>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
 
 ```php
 namespace App\Models;
@@ -156,9 +160,25 @@ $post = Post::first();
 var_dump($post->default_image);
 ```
 
+<<<<<<< HEAD
 #### files()
 
 This attribute exposes all files registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+=======
+#### getFiles()
+
+Returns a list of bound files with a little more details like mime, isImage, url, path and size
+
+```php
+$post = Post::first();
+var_dump($post->get_files);
+var_dump($user->get_files['image']);
+```
+
+#### files()
+
+This attribute exposes all images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+>>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
 
 ```php
 $user = User::first();
@@ -167,6 +187,7 @@ var_dump($user->files['avatar']);
 
 $post = Post::first();
 var_dump($post->files['image']);
+<<<<<<< HEAD
 ```
 
 #### getFiles()
@@ -193,11 +214,17 @@ $post = Post::first();
 var_dump($post->get_files['image']);
 var_dump($post->get_files['image']['url']);
 var_dump($post->get_files['image']['mime']);
+=======
+>>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
 ```
 
 #### responsiveImages()
 
+<<<<<<< HEAD
 This attribute exposes all responsive images generated for images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+=======
+If the registered files are images his attribute exposes responsive images for them or returns the defual image
+>>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
 
 ```php
 $user = User::first();
