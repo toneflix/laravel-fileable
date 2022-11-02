@@ -93,7 +93,6 @@ class Media
         }
 
         return asset($getPath . $src);
-<<<<<<< HEAD
     }
 
     public function getDefaultMedia(string $type): string
@@ -106,8 +105,6 @@ class Media
         }
 
         return asset($path . $default);
-=======
->>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
     }
 
     public function privateFile($file)
@@ -175,11 +172,7 @@ class Media
             // Reset the file instance
             $request->offsetUnset($file_name);
 
-<<<<<<< HEAD
             // If the file is an image resize it
-=======
-            // Resize the image
->>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
             $mime = Storage::mimeType($prefix . $getPath . $rename);
             $size = Arr::get($this->namespaces, $type.'.size');
             if ($size && str($mime)->contains('image')) {
