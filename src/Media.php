@@ -82,17 +82,44 @@ class Media
             return asset($getPath . $default);
         }
 
-        if (str($type)->contains('private.')) {
+        if ($returnPath === true) {
+            return $getPath . $src;
+        } elseif (str($type)->contains('private.')) {
             $secure = Arr::get($this->namespaces, $type.'.secure', false) === true ? 'secure' : 'open';
             return route("fileable.{$secure}.file", ['file' => base64url_encode($getPath.$src)]);
         }
 
+        return asset($getPath . $src);
+    }
 
-        if ($returnPath === true) {
-            return $getPath . $src;
+    /**
+     * Get the relative path of the file
+     *
+     * @param  string  $type
+     * @param  string  $src
+     * @return string
+     */
+    public function getPath(string $type, string $src = null): string|null
+    {
+        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $default = Arr::get($this->namespaces, $type.'.default');
+        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+
+        if (filter_var($src, FILTER_VALIDATE_URL)) {
+            return parse_url($src, PHP_URL_PATH);
         }
 
-        return asset($getPath . $src);
+        if (! $src || ! Storage::exists($prefix.$getPath.$src)) {
+            if (filter_var($default, FILTER_VALIDATE_URL)) {
+                return parse_url($default, PHP_URL_PATH);
+            } elseif (! Storage::exists($prefix . $getPath . $default)) {
+                return $this->default_media;
+            }
+
+            return $getPath . $default;
+        }
+
+        return $getPath . $src;
     }
 
     public function getDefaultMedia(string $type): string
