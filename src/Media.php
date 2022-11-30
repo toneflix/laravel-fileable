@@ -173,8 +173,8 @@ class Media
         $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
 
         $request = request();
+        $old_path = $prefix . $getPath . $old;
         if ($request->hasFile($file_name)) {
-            $old_path = $prefix.$getPath.$old;
 
             if ($old && Storage::exists($old_path) && $old !== 'default.png') {
                 Storage::delete($old_path);
