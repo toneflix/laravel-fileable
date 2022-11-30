@@ -210,6 +210,11 @@ class Media
 
             // Return the new file name
             return  $rename;
+        } elseif ($request->has($file_name)) {
+            if ($old && Storage::exists($old_path) && $old !== 'default.png') {
+                Storage::delete($old_path);
+            }
+            return  null;
         }
 
         // If no file is provided return the old file name
