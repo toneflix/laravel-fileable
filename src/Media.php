@@ -229,7 +229,7 @@ class Media
      * @param [type] $old
      * @return string|null
      */
-    public function saveDecoded(string $type, string $encoded_string = null, $old = null): string|null
+    public function saveEncoded(string $type, string $encoded_string = null, $old = null): string|null
     {
         $getPath = Arr::get($this->namespaces, $type . '.path');
         $prefix = !str($type)->contains('private.') ? 'public/' : '/';
