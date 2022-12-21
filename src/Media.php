@@ -222,6 +222,37 @@ class Media
     }
 
     /**
+     * Save a base64 encoded image string to storage
+     *
+     * @param string $type
+     * @param string|null $encoded_string
+     * @param [type] $old
+     * @return string|null
+     */
+    public function saveDecoded(string $type, string $encoded_string = null, $old = null): string|null
+    {
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
+
+        $old_path = $prefix . $getPath . $old;
+
+        if ($old && Storage::exists($old_path) && $old !== 'default.png') {
+            Storage::delete($old_path);
+        }
+
+        $imgdata = base64_decode($encoded_string);
+        $ext = str(finfo_buffer(finfo_open(), $imgdata, FILEINFO_EXTENSION))->before('/')->toString();
+        $ext = $ext === 'jpeg' ? 'jpg' : $ext;
+
+        $rename = rand() . '_' . rand() . '.' . $ext;
+        $path = $prefix . trim($getPath, '/') . '/' . $rename;
+
+        Storage::put($path, base64_decode($encoded_string));
+
+        return $rename;
+    }
+
+    /**
      * Delete a file from the storage
      *
      * @param  string  $type
