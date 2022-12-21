@@ -231,6 +231,10 @@ class Media
      */
     public function saveEncoded(string $type, string $encoded_string = null, $old = null): string|null
     {
+        if (!$encoded_string) {
+            return null;
+        }
+
         $getPath = Arr::get($this->namespaces, $type . '.path');
         $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
