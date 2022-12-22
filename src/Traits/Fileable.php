@@ -99,7 +99,7 @@ trait Fileable
 
     /**
      *  Returns a single media file from list of all bound files.
-    */
+     */
     public function mediaFile(): Attribute
     {
         return new Attribute(
@@ -108,21 +108,23 @@ trait Fileable
                 // If the file name is an array, get the first file
                 if (is_array($this->file_name)) {
                     foreach ($this->file_name as $file => $collection) {
-                        $file = $this->retrieveFile($file, $collection);
+                        $file_name = $file;
+                        $collection = $collection;
                         break;
                     }
                 } else {
-                    $file = $this->retrieveFile($this->file_name, $this->collection);
+                    $file_name = $this->file_name;
+                    $collection = $this->collection;
                 }
 
-                return $file;
+                return $this->retrieveFile($file_name, $collection) ?? (new Media)->getDefaultMedia($collection);
             },
         );
     }
 
     /**
      *  Returns the attribute of a single bound media file.
-    */
+     */
     public function mediaFileInfo(): Attribute
     {
         return new Attribute(
@@ -140,13 +142,14 @@ trait Fileable
                     $collection = $this->collection;
                 }
 
-                $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
+                $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
                 $file_path = $prefix . $this->retrieveFile($file_name, $collection, true);
 
                 $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
                 $isImage = str($mime)->contains('image');
 
-                $file_url = $this->retrieveFile($file_name, $collection);
+                $file_url = $this->retrieveFile($file_name, $collection) ?? (new Media)->getDefaultMedia($collection);
+
                 return [$file_name => [
                     'isImage' => $isImage,
                     'path' => $file_path,
@@ -158,6 +161,9 @@ trait Fileable
         );
     }
 
+    /**
+     *  Returns the default image for the model as an attribute
+     */
     public function defaultImage(): Attribute
     {
         return Attribute::make(
