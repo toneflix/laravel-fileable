@@ -156,6 +156,25 @@ $post = Post::first();
 var_dump($post->default_image);
 ```
 
+#### mediaFile()
+
+Returns a single media link from list of all bound files (Usefull especially when you are binding only a single resource)
+
+```php
+$user = User::first();
+$avatar = $user->media_file;
+var_dump($avatar);
+```
+
+#### mediaFileInfo()
+
+Returns the attribute of a single media file (Usefull especially when you are binding only a single resource)
+
+```php
+$post = Post::first();
+var_dump($post->media_file_info);
+```
+
 #### getFiles()
 
 Returns a list of bound files with a little more details like mime, isImage, url, path and size
@@ -213,8 +232,8 @@ If you discover any security related issues, please email code@toneflix.com.ng i
 
 ## Credits
 
-- [Toneflix Code](https://github.com/toneflix)
-- [All Contributors](../../contributors)
+-   [Toneflix Code](https://github.com/toneflix)
+-   [All Contributors](../../contributors)
 
 ## License
 
