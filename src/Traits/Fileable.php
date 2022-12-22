@@ -120,6 +120,44 @@ trait Fileable
         );
     }
 
+    /**
+     *  Returns the attribute of a single bound media file.
+    */
+    public function mediaFileInfo(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                $file = null;
+                // If the file name is an array, get the first file
+                if (is_array($this->file_name)) {
+                    foreach ($this->file_name as $file => $collection) {
+                        $file_name = $file;
+                        $collection = $collection;
+                        break;
+                    }
+                } else {
+                    $file_name = $this->file_name;
+                    $collection = $this->collection;
+                }
+
+                $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
+                $file_path = $prefix . $this->retrieveFile($file_name, $collection, true);
+
+                $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
+                $isImage = str($mime)->contains('image');
+
+                $file_url = $this->retrieveFile($file_name, $collection);
+                return [$file_name => [
+                    'isImage' => $isImage,
+                    'path' => $file_path,
+                    'url' => $file_url,
+                    'mime' => $mime,
+                    'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                ]];
+            },
+        );
+    }
+
     public function defaultImage(): Attribute
     {
         return Attribute::make(
