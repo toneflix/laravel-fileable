@@ -97,6 +97,29 @@ trait Fileable
         );
     }
 
+    /**
+     *  Returns a single media file from list of all bound files.
+    */
+    public function mediaFile(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                $file = null;
+                // If the file name is an array, get the first file
+                if (is_array($this->file_name)) {
+                    foreach ($this->file_name as $file => $collection) {
+                        $file = $this->retrieveFile($file, $collection);
+                        break;
+                    }
+                } else {
+                    $file = $this->retrieveFile($this->file_name, $this->collection);
+                }
+
+                return $file;
+            },
+        );
+    }
+
     public function defaultImage(): Attribute
     {
         return Attribute::make(
