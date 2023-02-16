@@ -204,7 +204,7 @@ class Media
             $size = Arr::get($this->namespaces, $type.'.size');
             if ($size && str($mime)->contains('image')) {
                 $this->imageDriver->make(storage_path('app/' . $prefix . $getPath . $rename))
-                    ->fit($size[0], $size[1])
+                    ->{isset($size[0], $size[1]) ? 'fit' : 'resize'}($size[0]??null, $size[1]??null)
                     ->save();
             }
 
