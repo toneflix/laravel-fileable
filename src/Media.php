@@ -44,13 +44,13 @@ class Media
      */
     public function getMedia(string $type, string $src = null, $returnPath = false): string|null
     {
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $default = Arr::get($this->namespaces, $type.'.default');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             $port = parse_url($src, PHP_URL_PORT);
-            $url = str($src)->replace('localhost:'.$port, 'localhost');
+            $url = str($src)->replace('localhost:' . $port, 'localhost');
 
             if ($returnPath === true) {
                 return parse_url($src, PHP_URL_PATH);
@@ -58,7 +58,7 @@ class Media
             return $url->replace('localhost', request()->getHttpHost());
         }
 
-        if (! $src || ! Storage::exists($prefix.$getPath.$src)) {
+        if (!$src || !Storage::exists($prefix . $getPath . $src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
 
                 if ($returnPath === true) {
@@ -66,7 +66,7 @@ class Media
                 }
 
                 return $default;
-            } elseif (! Storage::exists($prefix . $getPath . $default)) {
+            } elseif (!Storage::exists($prefix . $getPath . $default)) {
 
                 if ($returnPath === true) {
                     return $this->default_media;
@@ -85,8 +85,8 @@ class Media
         if ($returnPath === true) {
             return $getPath . $src;
         } elseif (str($type)->contains('private.')) {
-            $secure = Arr::get($this->namespaces, $type.'.secure', false) === true ? 'secure' : 'open';
-            return route("fileable.{$secure}.file", ['file' => base64url_encode($getPath.$src)]);
+            $secure = Arr::get($this->namespaces, $type . '.secure', false) === true ? 'secure' : 'open';
+            return route("fileable.{$secure}.file", ['file' => base64url_encode($getPath . $src)]);
         }
 
         return asset($getPath . $src);
@@ -101,18 +101,18 @@ class Media
      */
     public function getPath(string $type, string $src = null): string|null
     {
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $default = Arr::get($this->namespaces, $type.'.default');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             return parse_url($src, PHP_URL_PATH);
         }
 
-        if (! $src || ! Storage::exists($prefix.$getPath.$src)) {
+        if (!$src || !Storage::exists($prefix . $getPath . $src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
                 return parse_url($default, PHP_URL_PATH);
-            } elseif (! Storage::exists($prefix . $getPath . $default)) {
+            } elseif (!Storage::exists($prefix . $getPath . $default)) {
                 return $this->default_media;
             }
 
@@ -124,8 +124,8 @@ class Media
 
     public function getDefaultMedia(string $type): string
     {
-        $default = Arr::get($this->namespaces, $type.'.default');
-        $path = Arr::get($this->namespaces, $type.'.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
+        $path = Arr::get($this->namespaces, $type . '.path');
 
         if (filter_var($default, FILTER_VALIDATE_URL)) {
             return $default;
@@ -150,8 +150,8 @@ class Media
                 $response = Response::make(Storage::get($src));
                 // set headers
                 return $response->header('Content-Type', $mime)
-                        ->header('Cross-Origin-Resource-Policy', 'cross-origin')
-                        ->header('Access-Control-Allow-Origin', '*');
+                    ->header('Cross-Origin-Resource-Policy', 'cross-origin')
+                    ->header('Access-Control-Allow-Origin', '*');
             }
         }
     }
@@ -167,10 +167,10 @@ class Media
     public function save(string $type, string $file_name = null, $old = null, $index = null): string|null
     {
         // Get the file path
-        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
 
         // Get the file path prefix
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         $request = request();
         $old_path = $prefix . $getPath . $old;
@@ -189,11 +189,12 @@ class Media
             }
 
             // Give the file a new name and append extension
-            $rename = rand().'_'.rand().'.'.$requestFile->extension();
+            $rename = rand() . '_' . rand() . '.' . $requestFile->extension();
 
             // Store the file
             $requestFile->storeAs(
-                $prefix.trim($getPath, '/'), $rename
+                $prefix . trim($getPath, '/'),
+                $rename
             );
 
             // Reset the file instance
@@ -201,10 +202,12 @@ class Media
 
             // If the file is an image resize it
             $mime = Storage::mimeType($prefix . $getPath . $rename);
-            $size = Arr::get($this->namespaces, $type.'.size');
+            $size = Arr::get($this->namespaces, $type . '.size');
             if ($size && str($mime)->contains('image')) {
                 $this->imageDriver->make(storage_path('app/' . $prefix . $getPath . $rename))
-                    ->{isset($size[0], $size[1]) ? 'fit' : 'resize'}($size[0]??null, $size[1]??null)
+                    ->{isset($size[0], $size[1]) ? 'fit' : 'resize'}($size[0] ?? null, $size[1] ?? null, function ($constraint) {
+                        isset($size[0], $size[1]) ? $constraint->upsize() : $constraint->aspectRatio();
+                    })
                     ->save();
             }
 
@@ -265,10 +268,10 @@ class Media
      */
     public function delete(string $type, string $src = null): string|null
     {
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
-        $path = $prefix.$getPath.$src;
+        $path = $prefix . $getPath . $src;
 
         if ($src && Storage::exists($path) && $src !== 'default.png') {
             Storage::delete($path);
