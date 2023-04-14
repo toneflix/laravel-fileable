@@ -93,6 +93,25 @@ class Media
     }
 
     /**
+     * Check if the file exists
+     *
+     * @param  string  $type
+     * @param  string  $src
+     * @return bool
+     */
+    public function exists(string $type, string $src = null): bool
+    {
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
+
+        if (!$src || !Storage::exists($prefix . $getPath . $src)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get the relative path of the file
      *
      * @param  string  $type
