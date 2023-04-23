@@ -48,6 +48,11 @@ class Media
         $default = Arr::get($this->namespaces, $type . '.default');
         $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
+        if (str($src)->contains(':') && !str($src)->contains('http')) {
+            $type = str($src)->before(':');
+            $src = str($src)->after(':');
+        }
+
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             $port = parse_url($src, PHP_URL_PORT);
             $url = str($src)->replace('localhost:' . $port, 'localhost');
