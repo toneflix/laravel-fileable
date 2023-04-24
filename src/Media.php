@@ -44,14 +44,15 @@ class Media
      */
     public function getMedia(string $type, string $src = null, $returnPath = false): string|null
     {
+        if (str($src)->contains(':') && !str($src)->contains('http')) {
+            $type = str($src)->before(':')->__toString();
+            $src = str($src)->after(':')->__toString();
+        }
+
         $getPath = Arr::get($this->namespaces, $type . '.path');
         $default = Arr::get($this->namespaces, $type . '.default');
-        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
-        if (str($src)->contains(':') && !str($src)->contains('http')) {
-            $type = str($src)->before(':');
-            $src = str($src)->after(':');
-        }
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             $port = parse_url($src, PHP_URL_PORT);
