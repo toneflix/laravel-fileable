@@ -212,6 +212,11 @@ var_dump($post->responsive_images['image']);
 var_dump($post->responsive_images['banner']);
 ```
 
+#### Prefixed Media Collections
+
+While the library will try to resolve media files from the configured collection, you can also force media file search from collections different from the configured ones by saving the path reference on the database with a `collection:filename.ext` prefix, this will allow the system to look for media files in a collection named `collection` even if the current collection for the model is a collection named `images`;
+
+
 ### Testing
 
 ```bash
