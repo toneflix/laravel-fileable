@@ -2,23 +2,17 @@
 
 return [
     'collections' => [
+        'public' => [
+            'path' => '/',
+            'default' => 'default.jpg',
+        ],
         'avatar' => [
             'size' => [400, 400],
             'path' => 'avatars/',
             'default' => 'default.png',
         ],
-        'banner' => [
-            'size' => [1200, 600],
-            'path' => 'media/banners/',
-            'default' => 'default.png',
-        ],
         'default' => [
             'path' => 'media/default/',
-            'default' => 'default.png',
-        ],
-        'logo' => [
-            'size' => [200, 200],
-            'path' => 'media/logos/',
             'default' => 'default.png',
         ],
         'private' => [
@@ -29,10 +23,6 @@ return [
             'images' => [
                 'path' => 'files/images/',
                 'default' => 'default.png',
-                'secure' => true,
-            ],
-            'videos' => [
-                'path' => 'files/videos/',
                 'secure' => true,
             ],
         ],
