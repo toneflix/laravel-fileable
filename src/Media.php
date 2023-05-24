@@ -47,6 +47,7 @@ class Media
         if (str($src)->contains(':') && !str($src)->contains('http')) {
             $type = str($src)->before(':')->__toString();
             $src = str($src)->after(':')->__toString();
+            $getPath = Arr::get($this->namespaces, $type . '.path');
         }
 
         $getPath = Arr::get($this->namespaces, $type . '.path');
@@ -61,11 +62,16 @@ class Media
             if ($returnPath === true) {
                 return parse_url($src, PHP_URL_PATH);
             }
+
             return $url->replace('localhost', request()->getHttpHost());
         }
 
         if (!$src || !Storage::exists($prefix . $getPath . $src)) {
-            if (filter_var($default, FILTER_VALIDATE_URL)) {
+            $publicAsssetPath = str(public_path($prefix . $getPath . $src))->replace(['//','public/public'],['/','public'])->toString();
+
+            if (file_exists($publicAsssetPath)) {
+                return asset(str($publicAsssetPath)->replace(public_path(), '')->toString());
+            } elseif (filter_var($default, FILTER_VALIDATE_URL)) {
 
                 if ($returnPath === true) {
                     return parse_url($default, PHP_URL_PATH);
