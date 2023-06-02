@@ -117,7 +117,7 @@ trait Fileable
                     $collection = $this->collection;
                 }
 
-                return $this->retrieveFile($file_name, $collection) ?? (new Media)->getDefaultMedia($collection);
+                return $this->retrieveFile($file_name, $collection);
             },
         );
     }
