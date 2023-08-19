@@ -349,13 +349,18 @@ trait Fileable
                 $save_name = (new Media())->save($collection, $file, $this->{$file});
                 $this->{$file} = $save_name;
                 $this->saveQuietly();
+
+                // Run callback to indicate upload completion.
+                static::uploadComplete($this, $collection);
             }
         } else {
             $save_name = (new Media())->save($collection, $file_name, $this->{$file_name});
             $this->{$file_name} = $save_name;
             $this->saveQuietly();
+
+            // Run callback to indicate upload completion.
+            static::uploadComplete($this, $collection);
         }
-        static::uploadComplete($this);
     }
 
     /**
