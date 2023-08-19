@@ -40,6 +40,7 @@ class Media
      *
      * @param  string  $type
      * @param  string  $src
+     * @param  bool|string  $returnPath
      * @return string
      */
     public function getMedia(string $type, string $src = null, $returnPath = false): string|null
@@ -47,7 +48,6 @@ class Media
         if (str($src)->contains(':') && !str($src)->contains('http')) {
             $type = str($src)->before(':')->__toString();
             $src = str($src)->after(':')->__toString();
-            $getPath = Arr::get($this->namespaces, $type . '.path');
         }
 
         $getPath = Arr::get($this->namespaces, $type . '.path');
@@ -62,24 +62,17 @@ class Media
             if ($returnPath === true) {
                 return parse_url($src, PHP_URL_PATH);
             }
-
             return $url->replace('localhost', request()->getHttpHost());
         }
 
         if (!$src || !Storage::exists($prefix . $getPath . $src)) {
-            $publicAsssetPath = str(public_path($prefix . $getPath . $src))->replace(['//','public/public'],['/','public'])->toString();
-
-            if (file_exists($publicAsssetPath)) {
-                return asset(str($publicAsssetPath)->replace(public_path(), '')->toString());
-            } elseif (filter_var($default, FILTER_VALIDATE_URL)) {
-
+            if (filter_var($default, FILTER_VALIDATE_URL)) {
                 if ($returnPath === true) {
                     return parse_url($default, PHP_URL_PATH);
                 }
 
                 return $default;
             } elseif (!Storage::exists($prefix . $getPath . $default)) {
-
                 if ($returnPath === true) {
                     return $this->default_media;
                 }
@@ -87,14 +80,18 @@ class Media
                 return asset($this->default_media);
             }
 
-            if ($returnPath === true) {
+            if ($returnPath === 'full') {
+                return $prefix . $getPath . $default;
+            } elseif ($returnPath === true) {
                 return $getPath . $default;
             }
 
             return asset($getPath . $default);
         }
 
-        if ($returnPath === true) {
+        if ($returnPath === 'full') {
+            return $prefix . $getPath . $src;
+        } elseif ($returnPath === true) {
             return $getPath . $src;
         } elseif (str($type)->contains('private.')) {
             $secure = Arr::get($this->namespaces, $type . '.secure', false) === true ? 'secure' : 'open';
@@ -169,7 +166,6 @@ class Media
     {
         $src = base64url_decode($file);
         if (Storage::exists($src)) {
-
             $mime = Storage::mimeType($src);
             // create response and add encoded image data
             if (str($mime)->contains('image')) {
@@ -206,7 +202,6 @@ class Media
         $request = request();
         $old_path = $prefix . $getPath . $old;
         if ($request->hasFile($file_name)) {
-
             if ($old && Storage::exists($old_path) && $old !== 'default.png') {
                 Storage::delete($old_path);
             }
