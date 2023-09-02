@@ -38,13 +38,17 @@ class Media
     /**
      * Fetch an file from the storage
      *
-     * @param  string  $type
-     * @param  string  $src
-     * @param  bool|string  $returnPath
+     * @param  string  $type    The type of file to fetch (This will be the configured collection)
+     * @param  string  $src     The file name
+     * @param  bool    $returnPath  If true the method will return the relative path of the file
+     * @param  bool    $legacyMode  If true the method will remove the file path from the $src
      * @return string
      */
-    public function getMedia(string $type, string $src = null, $returnPath = false): string|null
+    public function getMedia(string $type, string $src = null, $returnPath = false, $legacyMode = false): string|null
     {
+        if ($legacyMode) {
+            $src = str($src)->afterLast('/')->__toString();
+        }
         if (str($src)->contains(':') && !str($src)->contains('http')) {
             $type = str($src)->before(':')->__toString();
             $src = str($src)->after(':')->__toString();
@@ -80,18 +84,14 @@ class Media
                 return asset($this->default_media);
             }
 
-            if ($returnPath === 'full') {
-                return $prefix . $getPath . $default;
-            } elseif ($returnPath === true) {
+            if ($returnPath === true) {
                 return $getPath . $default;
             }
 
             return asset($getPath . $default);
         }
 
-        if ($returnPath === 'full') {
-            return $prefix . $getPath . $src;
-        } elseif ($returnPath === true) {
+        if ($returnPath === true) {
             return $getPath . $src;
         } elseif (str($type)->contains('private.')) {
             $secure = Arr::get($this->namespaces, $type . '.secure', false) === true ? 'secure' : 'open';
