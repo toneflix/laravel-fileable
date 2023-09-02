@@ -20,11 +20,19 @@ trait Fileable
 
     public string|array $file_name = 'file';
 
-    protected bool $applyDefault = false;
-
     public static string $static_collection = 'image';
 
     public static string|array $static_file_name = 'file';
+
+    /**
+     * Legacy mode is used to support media files that were saved before the introduction of the fileable trait
+     */
+    protected bool $legacyMode = false;
+
+    /**
+     * Apply default image if no image is found
+     */
+    protected bool $applyDefault = false;
 
     public function __construct(array $attributes = [])
     {
@@ -62,26 +70,6 @@ trait Fileable
                 $item->removeFile(self::$static_file_name, self::$static_collection);
             });
         }
-    }
-
-    /**
-     * Register a creating model event with the dispatcher.
-     *
-     * @param  \Illuminate\Events\QueuedClosure|\Closure|string|array  $callback
-     * @return void
-     */
-    public static function uploadComplete($model)
-    {
-    }
-
-    /**
-     * All extra model events should be registered here instead of on the model
-     * Overite this method on the model
-     *
-     * @return void
-     */
-    public static function registerEvents()
-    {
     }
 
     /**
@@ -125,7 +113,7 @@ trait Fileable
         return new Attribute(
             get: function () {
                 $file = null;
-            // If the file name is an array, get the first file
+                // If the file name is an array, get the first file
                 if (is_array($this->file_name)) {
                     foreach ($this->file_name as $file => $collection) {
                         $file_name = $file;
@@ -150,7 +138,7 @@ trait Fileable
         return new Attribute(
             get: function () {
                 $file = null;
-            // If the file name is an array, get the first file
+                // If the file name is an array, get the first file
                 if (is_array($this->file_name)) {
                     foreach ($this->file_name as $file => $collection) {
                         $file_name = $file;
@@ -171,11 +159,11 @@ trait Fileable
                 $file_url = $this->retrieveFile($file_name, $collection) ?? (new Media())->getDefaultMedia($collection);
 
                 return [$file_name => [
-                'isImage' => $isImage,
-                'path' => $file_path,
-                'url' => $file_url,
-                'mime' => $mime,
-                'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                    'isImage' => $isImage,
+                    'path' => $file_path,
+                    'url' => $file_url,
+                    'mime' => $mime,
+                    'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
                 ]];
             },
         );
@@ -205,7 +193,7 @@ trait Fileable
                             $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
 
                             $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($file, $collection, true)))
-                                    ->contains('image');
+                                        ->contains('image');
 
                             if (!$isImage) {
                                 return [$key => $this->default_image];
@@ -222,7 +210,7 @@ trait Fileable
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
                         $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
                         $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_name, $this->collection, true)))
-                                ->contains('image');
+                                    ->contains('image');
 
                         if (!$isImage) {
                             return [$key => $this->default_image];
@@ -255,11 +243,11 @@ trait Fileable
                         $file_url = $this->retrieveFile($file, $collection);
 
                         $files[$file] = [
-                        'isImage' => $isImage,
-                        'path' => $file_path,
-                        'url' => $file_url,
-                        'mime' => $mime,
-                        'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                            'isImage' => $isImage,
+                            'path' => $file_path,
+                            'url' => $file_url,
+                            'mime' => $mime,
+                            'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
                         ];
                     }
 
@@ -273,15 +261,25 @@ trait Fileable
 
                     $file_url = $this->retrieveFile($this->file_name, $this->collection);
                     return [$this->file_name => [
-                    'isImage' => $isImage,
-                    'path' => $file_path,
-                    'url' => $file_url,
-                    'mime' => $mime,
-                    'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                        'isImage' => $isImage,
+                        'path' => $file_path,
+                        'url' => $file_url,
+                        'mime' => $mime,
+                        'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
                     ]];
                 }
             },
         );
+    }
+
+    /**
+     * All extra model events should be registered here instead of on the model
+     * Overite this method on the model
+     *
+     * @return void
+     */
+    public static function registerEvents()
+    {
     }
 
     /**
@@ -301,9 +299,14 @@ trait Fileable
      * @param  string  $collection
      * @return void
      */
-    public function fileableLoader(string|array $file_name = 'file', string $collection = 'default', $applyDefault = false)
-    {
+    public function fileableLoader(
+        string|array $file_name = 'file',
+        string $collection = 'default',
+        bool $applyDefault = false,
+        bool $legacyMode = false
+    ) {
         $this->applyDefault = $applyDefault;
+        $this->legacyMode = $legacyMode;
 
         if (is_array($file_name)) {
             foreach ($file_name as $file => $collection) {
@@ -349,17 +352,11 @@ trait Fileable
                 $save_name = (new Media())->save($collection, $file, $this->{$file});
                 $this->{$file} = $save_name;
                 $this->saveQuietly();
-
-                // Run callback to indicate upload completion.
-                static::uploadComplete($this, $collection);
             }
         } else {
             $save_name = (new Media())->save($collection, $file_name, $this->{$file_name});
             $this->{$file_name} = $save_name;
             $this->saveQuietly();
-
-            // Run callback to indicate upload completion.
-            static::uploadComplete($this, $collection);
         }
     }
 
@@ -373,7 +370,7 @@ trait Fileable
     public function retrieveFile(string $file_name = 'file', string $collection = 'default', bool $returnPath = false)
     {
         if ($this->{$file_name}) {
-            return (new Media())->getMedia($collection, $this->{$file_name}, $returnPath);
+            return (new Media())->getMedia($collection, $this->{$file_name}, $returnPath, $this->legacyMode);
         }
 
         if ($this->applyDefault) {
