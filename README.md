@@ -126,6 +126,14 @@ The `fileableLoader()` method also accepts the `key` as a string as the first pa
 $this->fileableLoader('avatar', 'default');
 ```
 
+#### Loading|Not Loading default media. 
+
+The third parameter of the `fileableLoader()` is a boolean value that determines wether to return null or the default image when the requested file is not found.
+
+#### Supporting old setup (Legacy Mode)
+
+If you had your model running before the introducation of the the Fileable trait, you might still be able to load your existing files by passing a fourth parameter to the `fileableLoader()`, the **Legacy mode** attempts to load media files that had been stored or managed by a different logic before the introduction of the fileable trait.
+
 ### Model Events
 
 If you use listen to laravel events via the `boot()` you would need to move your event handles to the `registerEvents()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
