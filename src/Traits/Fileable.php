@@ -346,18 +346,33 @@ trait Fileable
      */
     public function saveImage(string|array $file_name = null, string $collection = 'default')
     {
+        $request = request();
+
         $file_name = $file_name ?? $this->file_name;
         if (is_array($file_name)) {
             foreach ($file_name as $file => $collection) {
-                $save_name = (new Media())->save($collection, $file, $this->{$file});
+                if ($this->checkBase64($request->get($file))) {
+                    $save_name = (new Media())->saveEncoded($collection, $request->get($file), $this->{$file});
+                } else {
+                    $save_name = (new Media())->save($collection, $file, $this->{$file});
+                }
                 $this->{$file} = $save_name;
                 $this->saveQuietly();
             }
         } else {
-            $save_name = (new Media())->save($collection, $file_name, $this->{$file_name});
+            if ($this->checkBase64($request->get($file_name))) {
+                $save_name = (new Media())->saveEncoded($collection, $request->get($file_name), $this->{$file_name});
+            } else {
+                $save_name = (new Media())->save($collection, $file_name, $this->{$file_name});
+            }
             $this->{$file_name} = $save_name;
             $this->saveQuietly();
         }
+    }
+
+    public function checkBase64($file): bool
+    {
+        return (bool) preg_match('/^data:image\/(\w+);base64,/', $file);
     }
 
     /**
