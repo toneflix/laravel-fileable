@@ -255,31 +255,54 @@ class Media
      *
      * @param string $type
      * @param string|null $encoded_string
-     * @param [type] $old
+     * @param string $old
      * @return string|null
      */
-    public function saveEncoded(string $type, string $encoded_string = null, $old = null): string|null
+    public function saveEncoded(string $type, string $encoded_string = null, $old = null, $index = null): string|null
     {
         if (!$encoded_string) {
             return null;
         }
 
+        // Get the file path
         $getPath = Arr::get($this->namespaces, $type . '.path');
+
+        // Get the file path prefix
         $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         $old_path = $prefix . $getPath . $old;
 
+        // Delete the old file
         if ($old && Storage::exists($old_path) && $old !== 'default.png') {
             Storage::delete($old_path);
         }
 
-        $imgdata = base64_decode($encoded_string);
-        $ext = str(finfo_buffer(finfo_open(), $imgdata, FILEINFO_EXTENSION))->before('/')->toString();
-        $ext = $ext === 'jpeg' ? 'jpg' : $ext;
+        // Check if the string has a base64 prefix and remove it
+        if (str($encoded_string)->contains('base64,')) {
+            $encoded_string = str($encoded_string)->after('base64,')->__toString();
+        }
 
-        $rename = rand() . '_' . rand() . '.' . $ext;
+        // Decode the string
+        $imgdata = base64_decode($encoded_string);
+
+        // Get the file extension
+        $ext = str(finfo_buffer(finfo_open(), $imgdata, FILEINFO_EXTENSION))->before('/')->toString();
+
+        // Get the file extension
+        $extension = collect([
+            '' => 'png',
+            '???' => str($encoded_string)->between('/', ';')->toString(),
+            'svg+xml' => 'svg',
+            'jpeg' => 'jpg',
+            'plain' => 'txt',
+            'octet-stream' => 'bin',
+        ])->get($ext, $ext);
+
+        // Give the file a new name and append extension
+        $rename = rand() . '_' . rand() . '.' . $extension;
         $path = $prefix . trim($getPath, '/') . '/' . $rename;
 
+        // Store the file
         Storage::put($path, base64_decode($encoded_string));
 
         return $rename;
