@@ -227,9 +227,12 @@ class Media
             $request->offsetUnset($file_name);
 
             // If the file is an image resize it
-            $mime = Storage::mimeType($prefix . $getPath . $rename);
             $size = Arr::get($this->namespaces, $type . '.size');
-            if ($size && str($mime)->contains('image')) {
+
+            // File extensions that can be proccessed by GD should be handed to GD to handle
+            $img_exts = collect(['jpg', 'png', 'gif', 'bmp', 'webp']);
+
+            if ($size && $img_exts->contains(strtolower($requestFile->extension()))) {
                 $this->imageDriver->make(storage_path('app/' . $prefix . $getPath . $rename))
                     ->{isset($size[0], $size[1]) ? 'fit' : 'resize'}($size[0] ?? null, $size[1] ?? null, function ($constraint) {
                         isset($size[0], $size[1]) ? $constraint->upsize() : $constraint->aspectRatio();
