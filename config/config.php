@@ -49,7 +49,7 @@ return [
         'lg-square' => '720x720',
         'xl-square' => '1080x1080',
     ],
-    'file_route_secure_middleware' => 'window_auth',
+    'file_route_secure_middleware' => 'web',
     'file_route_secure' => 'secure/files/{file}',
     'file_route_open' => 'open/files/{file}',
     'image_templates' => [
