@@ -13,8 +13,6 @@ class Media
 
     public $default_media = 'media/default.png';
 
-    public $imageDriver;
-
     public $namespaces;
 
     public function __construct()
@@ -68,7 +66,7 @@ class Media
             if ($returnPath === true) {
                 return parse_url($src, PHP_URL_PATH);
             }
-            return $url->replace('localhost', request()->getHttpHost());
+            return Initiator::asset($url->replace('localhost', request()->getHttpHost()), true);
         }
 
         if (!$src || !Storage::exists($prefix . $getPath . $src)) {
@@ -83,24 +81,26 @@ class Media
                     return $this->default_media;
                 }
 
-                return asset($this->default_media);
+                return Initiator::asset($this->default_media);
             }
 
             if ($returnPath === true) {
-                return $getPath . $default;
+                return Initiator::asset($getPath . $default, true);
             }
 
-            return asset($getPath . $default);
+            return Initiator::asset($getPath . $default);
         }
 
         if ($returnPath === true) {
-            return $getPath . $src;
+            return Initiator::asset($getPath . $src, true);
         } elseif (str($type)->contains('private.')) {
             $secure = Arr::get($this->namespaces, $type . '.secure', false) === true ? 'secure' : 'open';
-            return route("fileable.{$secure}.file", ['file' => base64url_encode($getPath . $src)]);
+            return Initiator::asset(route("fileable.{$secure}.file", [
+                'file' => base64url_encode($getPath . $src)
+            ]), true);
         }
 
-        return asset($getPath . $src);
+        return Initiator::asset($getPath . $src);
     }
 
     /**
@@ -161,7 +161,7 @@ class Media
             return $default;
         }
 
-        return asset($path . $default);
+        return Initiator::asset($path . $default);
     }
 
     public function privateFile($file)
