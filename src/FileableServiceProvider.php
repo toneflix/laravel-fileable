@@ -3,10 +3,6 @@
 namespace ToneflixCode\LaravelFileable;
 
 use Illuminate\Support\ServiceProvider;
-use ToneflixCode\LaravelFileable\Intervention\Media1080;
-use ToneflixCode\LaravelFileable\Intervention\Media431;
-use ToneflixCode\LaravelFileable\Intervention\Media694;
-use ToneflixCode\LaravelFileable\Intervention\Media720;
 
 class FileableServiceProvider extends ServiceProvider
 {
@@ -15,7 +11,7 @@ class FileableServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
 
         config([
             'filesystems.links' => collect(config('filesystems.links'))
@@ -35,11 +31,10 @@ class FileableServiceProvider extends ServiceProvider
             'imagecache.templates' => collect(config('imagecache.templates'))
                 ->union(config('toneflix-fileable.image_templates', []))
                 ->union([
-                    '431' => Media431::class,
-                    '694' => Media694::class,
-                    '720' => Media720::class,
-                    '1080' => Media1080::class,
-                    '1080' => Media1080::class,
+                    '431' => [431, 767],
+                    '694' => [431, 767],
+                    '720' => [431, 767],
+                    '1080' => [431, 767],
                 ]),
         ]);
 
@@ -48,7 +43,7 @@ class FileableServiceProvider extends ServiceProvider
          */
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('toneflix-fileable.php'),
+                __DIR__ . '/../config/config.php' => config_path('toneflix-fileable.php'),
             ], 'config');
         }
     }
@@ -59,11 +54,11 @@ class FileableServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'toneflix-fileable');
+        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'toneflix-fileable');
 
         // Register the main class to use with the facade
         $this->app->singleton('laravel-fileable', function () {
-            return new Media;
+            return new Media();
         });
     }
 }
