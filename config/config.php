@@ -45,9 +45,14 @@ return [
         'xl' => '1080',
     ],
     'file_route_secure_middleware' => 'window_auth',
+    'responsive_image_route' => 'images/responsive',
     'file_route_secure' => 'secure/files/{file}',
     'file_route_open' => 'open/files/{file}',
     'image_templates' => [
+        '431' => [431, 767],
+        '694' => [694, 521],
+        '720' => [720, 405],
+        '1080' => [1080, 767],
     ],
     'symlinks' => [
         public_path('avatars') => storage_path('app/public/avatars'),

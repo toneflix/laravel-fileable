@@ -19,25 +19,6 @@ class FileableServiceProvider extends ServiceProvider
                 ->toArray(),
         ]);
 
-        config([
-            'imagecache.route' => config('imagecache.route', 'images/responsive'),
-            'imagecache.paths' => collect(config('imagecache.paths'))
-                ->merge(collect(config('toneflix-fileable.symlinks', []))->values())
-                ->merge(collect(config('toneflix-fileable.symlinks', []))->keys())
-                ->merge(Initiator::collectionPaths())
-                ->unique()
-                ->values()
-                ->toArray(),
-            'imagecache.templates' => collect(config('imagecache.templates'))
-                ->union(config('toneflix-fileable.image_templates', []))
-                ->union([
-                    '431' => [431, 767],
-                    '694' => [431, 767],
-                    '720' => [431, 767],
-                    '1080' => [431, 767],
-                ]),
-        ]);
-
         /*
          * Optional methods to load your package assets
          */
