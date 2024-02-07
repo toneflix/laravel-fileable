@@ -1,7 +1,8 @@
 # Laravel Fileable
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/toneflix-code/laravel-fileable.svg?style=flat-round)](https://packagist.org/packages/toneflix-code/laravel-fileable)
-[![Total Downloads](https://img.shields.io/packagist/dt/toneflix-code/laravel-fileable.svg?style=flat-round)](https://packagist.org/packages/toneflix-code/laravel-fileable)
+[![Test & Lint](https://github.com/toneflix/laravel-fileable/actions/workflows/php.yml/badge.svg?branch=dev)](https://github.com/toneflix/laravel-fileable/actions/workflows/php.yml)
+[![Latest Stable Version](http://poser.pugx.org/toneflix-code/laravel-fileable/v)](https://packagist.org/packages/toneflix-code/laravel-fileable) [![Total Downloads](http://poser.pugx.org/toneflix-code/laravel-fileable/downloads)](https://packagist.org/packages/toneflix-code/laravel-fileable) [![Latest Unstable Version](http://poser.pugx.org/toneflix-code/laravel-fileable/v/unstable)](https://packagist.org/packages/toneflix-code/laravel-fileable) [![License](http://poser.pugx.org/toneflix-code/laravel-fileable/license)](https://packagist.org/packages/toneflix-code/laravel-fileable) [![PHP Version Require](http://poser.pugx.org/toneflix-code/laravel-fileable/require/php)](https://packagist.org/packages/toneflix-code/laravel-fileable)
+[![codecov](https://codecov.io/gh/toneflix/laravel-fileable/graph/badge.svg?token=2O7aFulQ9P)](https://codecov.io/gh/toneflix/laravel-fileable)
 
 <!-- ![GitHub Actions](https://github.com/toneflix/laravel-fileable/actions/workflows/main.yml/badge.svg) -->
 
