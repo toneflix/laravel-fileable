@@ -47,7 +47,7 @@ abstract class TestCase extends Orchestra
             $_SERVER['KUDISMS_TEST_NUMBERS'] ?? $_ENV['KUDISMS_TEST_NUMBERS'] ?? ''
         );
 
-        $migration = include __DIR__ . '/database/migrations/create_users_tables.php';
+        $migration = include __DIR__.'/database/migrations/create_users_tables.php';
         $migration->up();
     }
 
@@ -56,10 +56,10 @@ abstract class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'ToneflixCode\\KudiSmsNotification\\Tests\\Database\\Factories\\' .
+            fn (string $modelName) => 'ToneflixCode\\KudiSmsNotification\\Tests\\Database\\Factories\\'.
             class_basename(
                 $modelName
-            ) . 'Factory'
+            ).'Factory'
         );
     }
 

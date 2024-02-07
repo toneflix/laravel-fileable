@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 use ToneflixCode\LaravelFileable\Media;
 
 /**
- * @see \ToneflixCode\FileableFacade\Skeleton\SkeletonClass
+ * @see \ToneflixCode\LaravelFileable\Media
  */
 class Fileable extends Facade
 {

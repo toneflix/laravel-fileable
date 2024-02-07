@@ -5,7 +5,7 @@
 
 <!-- ![GitHub Actions](https://github.com/toneflix/laravel-fileable/actions/workflows/main.yml/badge.svg) -->
 
-Laravel Fileable exposes methods that make handling file upload with Laravel filesystem even easier, it also exposes a trait that automatically handles file uploads for you.
+Laravel Fileable exposes methods that make handling file upload with Laravel filesystem even easier, it also exposes a trait that automatically handles file uploads for you with support for uploading base64 encoded files.
 
 ## Installation
 
@@ -80,11 +80,7 @@ The `image_templates` option generates image filters based on [Intervention Imag
 
 ## Usage
 
-<<<<<<< HEAD
-To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required imageables using the `fileableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
-=======
 To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required filables using the `fileableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
->>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
 
 ```php
 namespace App\Models;
@@ -130,6 +126,14 @@ The `fileableLoader()` method also accepts the `key` as a string as the first pa
 $this->fileableLoader('avatar', 'default');
 ```
 
+#### Loading|Not Loading default media. 
+
+The third parameter of the `fileableLoader()` is a boolean value that determines wether to return null or the default image when the requested file is not found.
+
+#### Supporting old setup (Legacy Mode)
+
+If you had your model running before the introducation of the the Fileable trait, you might still be able to load your existing files by passing a fourth parameter to the `fileableLoader()`, the **Legacy mode** attempts to load media files that had been stored or managed by a different logic before the introduction of the fileable trait.
+
 ### Model Events
 
 If you use listen to laravel events via the `boot()` you would need to move your event handles to the `registerEvents()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
@@ -160,11 +164,25 @@ $post = Post::first();
 var_dump($post->default_image);
 ```
 
-<<<<<<< HEAD
-#### files()
+#### mediaFile()
 
-This attribute exposes all files registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
-=======
+Returns a single media link from list of all bound files (Usefull especially when you are binding only a single resource)
+
+```php
+$user = User::first();
+$avatar = $user->media_file;
+var_dump($avatar);
+```
+
+#### mediaFileInfo()
+
+Returns the attribute of a single media file (Usefull especially when you are binding only a single resource)
+
+```php
+$post = Post::first();
+var_dump($post->media_file_info);
+```
+
 #### getFiles()
 
 Returns a list of bound files with a little more details like mime, isImage, url, path and size
@@ -178,7 +196,6 @@ var_dump($user->get_files['image']);
 #### files()
 
 This attribute exposes all images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
->>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
 
 ```php
 $user = User::first();
@@ -187,44 +204,11 @@ var_dump($user->files['avatar']);
 
 $post = Post::first();
 var_dump($post->files['image']);
-<<<<<<< HEAD
-```
-
-#### getFiles()
-
-This attribute exposes all files registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait with usefull metadata.
-
-Available properties in in this attribute include:
-
-1. **_isImage_** This property will indicate is the current file is an image file.
-2. **path** returns the absolute path to the current file.
-3. **url** returns the absolute url to the current file.
-4. **mime** returns the mimetype for the current file.
-5. **size** returns the file size of the current file in bytes.
-
-```php
-$user = User::first();
-var_dump($user->get_files);
-var_dump($user->get_files['avatar']);
-var_dump($user->get_files['avatar']['isImage']);
-var_dump($user->get_files['avatar']['size']);
-var_dump($user->get_files['avatar']['path']);
-
-$post = Post::first();
-var_dump($post->get_files['image']);
-var_dump($post->get_files['image']['url']);
-var_dump($post->get_files['image']['mime']);
-=======
->>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
 ```
 
 #### responsiveImages()
 
-<<<<<<< HEAD
-This attribute exposes all responsive images generated for images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
-=======
-If the registered files are images his attribute exposes responsive images for them or returns the defual image
->>>>>>> ba03cd13d243fbead53a98ae2dbfc2605cf6dc18
+If the registered files are images this attribute exposes responsive images for them or returns the defual image
 
 ```php
 $user = User::first();
@@ -235,6 +219,11 @@ $post = Post::first();
 var_dump($post->responsive_images['image']);
 var_dump($post->responsive_images['banner']);
 ```
+
+#### Prefixed Media Collections
+
+While the library will try to resolve media files from the configured collection, you can also force media file search from collections different from the configured ones by saving the path reference on the database with a `collection:filename.ext` prefix, this will allow the system to look for media files in a collection named `collection` even if the current collection for the model is a collection named `images`;
+
 
 ### Testing
 
@@ -256,8 +245,8 @@ If you discover any security related issues, please email code@toneflix.com.ng i
 
 ## Credits
 
-- [Toneflix Code](https://github.com/toneflix)
-- [All Contributors](../../contributors)
+-   [Toneflix Code](https://github.com/toneflix)
+-   [All Contributors](../../contributors)
 
 ## License
 
