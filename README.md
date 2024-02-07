@@ -15,7 +15,7 @@ You can install the package via composer:
 composer require toneflix-code/laravel-fileable
 ```
 
-## Installation
+## Package Discovery
 
 Laravel automatically discovers and publishes service providers but optionally after you have installed Laravel Fileable, open your Laravel config file config/app.php and add the following lines.
 
@@ -30,6 +30,16 @@ Add the facade of this package to the $aliases array.
 ```php
 'Fileable' => ToneflixCode\LaravelFileable\Facades\Fileable::class
 ```
+
+## Upgrading
+
+Version 2.x is not compatible with version 1.x, if you are ugrading from version 1.x here are a few notes:
+
+### Config
+
+1. If you published the configuration file, remove `image_templates`. Templates are no longer needed, just set you responsive image sizes using the `image_sizes` property.
+
+2. Add `responsive_image_route` and set the value `route/path/{file}/{size}`, `route/path` can be whatever you want it to be, `{file}/{size}` can be anything you want to name them but both are required.
 
 ## Configuration
 
@@ -126,7 +136,7 @@ The `fileableLoader()` method also accepts the `key` as a string as the first pa
 $this->fileableLoader('avatar', 'default');
 ```
 
-#### Loading|Not Loading default media. 
+#### Loading|Not Loading default media.
 
 The third parameter of the `fileableLoader()` is a boolean value that determines wether to return null or the default image when the requested file is not found.
 
@@ -224,7 +234,6 @@ var_dump($post->responsive_images['banner']);
 
 While the library will try to resolve media files from the configured collection, you can also force media file search from collections different from the configured ones by saving the path reference on the database with a `collection:filename.ext` prefix, this will allow the system to look for media files in a collection named `collection` even if the current collection for the model is a collection named `images`;
 
-
 ### Testing
 
 ```bash
@@ -245,8 +254,8 @@ If you discover any security related issues, please email code@toneflix.com.ng i
 
 ## Credits
 
--   [Toneflix Code](https://github.com/toneflix)
--   [All Contributors](../../contributors)
+- [Toneflix Code](https://github.com/toneflix)
+- [All Contributors](../../contributors)
 
 ## License
 
