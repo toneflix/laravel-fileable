@@ -226,10 +226,10 @@ class Media
             // Give the file a new name and append extension
             $rename = rand() . '_' . rand() . '.' . $requestFile->extension();
 
-            // Store the file
-            $requestFile->storeAs(
-                $prefix . trim($getPath, '/'),
-                $rename
+            $this->disk->putFileAs(
+                $prefix . $getPath, // Path
+                $requestFile, // Request File
+                $rename // Directory
             );
 
             // Reset the file instance
@@ -244,7 +244,7 @@ class Media
 
             // If the file is an image resize it if size is available
             if ($size && str($mime)->contains('image')) {
-                $this->imageDriver->read(storage_path('app/' . $prefix . $getPath . $rename))
+                $this->imageDriver->read($this->disk->path($prefix . $getPath . $rename))
                     ->cover(Arr::first($size), Arr::last($size))
                     ->save();
             }
