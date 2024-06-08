@@ -17,8 +17,6 @@ trait Fileable
 
     /**
      * THe prefered disk for this instance
-     *
-     * @var string|null
      */
     public ?string $disk = null;
 
@@ -31,8 +29,6 @@ trait Fileable
 
     /**
      * The name of the collection where files for the model should be stored in
-     *
-     * @var string
      */
     public string $collection = 'image';
 
@@ -40,9 +36,9 @@ trait Fileable
      * The field in the DB where the file reference should be saved
      * If this is an array, the field should be mapped to the $file_name property
      *
-     * @example db_field $db_field = ['image' => 'avatar']; 
+     * @example db_field $db_field = ['image' => 'avatar'];
      * In this case avatar is an existing DB field and image will be the filename from the request
-     * 
+     *
      * @var string|array<string,string>|null
      */
     public string|array|null $db_field = '';
@@ -56,9 +52,13 @@ trait Fileable
     public string|array $file_name = 'file';
 
     /**
+     * Legacy mode is used to support media files that were saved before the introduction of the fileable trait
+     */
+    protected bool $legacyMode = false;
+
+    /**
+     * Apply default file if no file is found
      * If set to false missing files will not be replaced with the default URL
-     *
-     * @var bool
      */
     protected bool $applyDefault = false;
 
@@ -131,7 +131,71 @@ trait Fileable
     }
 
     /**
-     * Get the default image
+     *  Returns a single media file from list of all bound files.
+     */
+    public function mediaFile(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                $file = null;
+                // If the file name is an array, get the first file
+                if (is_array($this->file_name)) {
+                    foreach ($this->file_name as $file => $collection) {
+                        $file_name = $file;
+                        $collection = $collection;
+                        break;
+                    }
+                } else {
+                    $file_name = $this->file_name;
+                    $collection = $this->collection;
+                }
+
+                return $this->retrieveFile($file_name, $collection) ?? (new Media())->getDefaultMedia($collection);
+            },
+        );
+    }
+
+    /**
+     *  Returns the attribute of a single bound media file.
+     */
+    public function mediaFileInfo(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                $file = null;
+                // If the file name is an array, get the first file
+                if (is_array($this->file_name)) {
+                    foreach ($this->file_name as $file => $collection) {
+                        $file_name = $file;
+                        $collection = $collection;
+                        break;
+                    }
+                } else {
+                    $file_name = $this->file_name;
+                    $collection = $this->collection;
+                }
+
+                $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
+                $file_path = $prefix . $this->retrieveFile($file_name, $collection, true);
+
+                $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
+                $isImage = str($mime)->contains('image');
+
+                $file_url = $this->retrieveFile($file_name, $collection) ?? (new Media())->getDefaultMedia($collection);
+
+                return [$file_name => [
+                    'isImage' => $isImage,
+                    'path' => $file_path,
+                    'url' => $file_url,
+                    'mime' => $mime,
+                    'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                ]];
+            },
+        );
+    }
+
+    /**
+     *  Returns the default image for the model as an attribute
      */
     public function defaultImage(): Attribute
     {
@@ -143,9 +207,6 @@ trait Fileable
         );
     }
 
-    /**
-     * Generate responseive images
-     */
     public function responsiveImages(): Attribute
     {
         return Attribute::make(
@@ -259,16 +320,18 @@ trait Fileable
      * All fileable properties should be registered
      *
      * @param  string|array<string,string>  $file_name   filename | [filename => collection]
-     * @param  string $collection  The name of the collection where files for the model should be stored in
-     * @param  string $applyDefault  If set to false missing files will not be replaced with the default URL
-     * @param  string|array|null $db_field  The field in the DB where the file reference should be saved
+     * @param  string  $collection  The name of the collection where files for the model should be stored in
+     * @param  string  $applyDefault  If set to false missing files will not be replaced with the default URL
+     * @param  bool  $legacyMode Support media files that were saved before the introduction of the fileable trait
+     * @param  string|array|null  $db_field  The field in the DB where the file reference should be saved
      * @return void
      */
     public function fileableLoader(
         string|array $file_name = 'file',
         string $collection = 'default',
         bool $applyDefault = false,
-        string|array|null $db_field = null
+        bool $legacyMode = false,
+        string|array $db_field = null,
     ) {
         if (is_array($file_name)) {
             foreach ($file_name as $file => $collection) {
@@ -293,8 +356,8 @@ trait Fileable
         if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
             throw new \ErrorException("$collection is not a valid collection");
         }
-
         $this->applyDefault = $applyDefault;
+        $this->legacyMode = $legacyMode;
         $this->collection = $collection;
         $this->file_name = $file_name;
         $this->db_field = $db_field ?? $this->db_field;
@@ -307,21 +370,39 @@ trait Fileable
      */
     public function saveImage(string|array $file_name = null, string $collection = 'default')
     {
+        $request = request();
+
         $file_name = $file_name ?? $this->file_name;
         if (is_array($file_name)) {
             foreach ($file_name as $file => $collection) {
-                $save_name = (new Media($this->disk))->save($collection, $file, $this->{$this->getFieldName($file)});
+                if ($this->checkBase64($request->get($file))) {
+                    $save_name = (new Media($this->disk))
+                        ->saveEncoded($collection, $request->get($file), $this->{$this->getFieldName($file)});
+                } else {
+                    $save_name = (new Media($this->disk))
+                        ->save($collection, $file, $this->{$this->getFieldName($file)});
+                }
                 // This maps to $this->image = $save_name where image is an existing database field
                 $this->{$this->getFieldName($file)} = $save_name;
                 $this->saveQuietly();
             }
         } else {
-            $save_name = (new Media($this->disk))
-                ->save($collection, $file_name, $this->{$this->getFieldName($file_name)});
+            if ($this->checkBase64($request->get($file_name))) {
+                $save_name = (new Media($this->disk))
+                    ->saveEncoded($collection, $request->get($file_name), $this->{$this->getFieldName($file_name)});
+            } else {
+                $save_name = (new Media($this->disk))
+                    ->save($collection, $file_name, $this->{$this->getFieldName($file_name)});
+            }
             // This maps to $this->image = $save_name where image is an existing database field
             $this->{$this->getFieldName($file_name)} = $save_name;
             $this->saveQuietly();
         }
+    }
+
+    public function checkBase64($file): bool
+    {
+        return (bool) preg_match('/^data:image\/(\w+);base64,/', $file);
     }
 
     /**

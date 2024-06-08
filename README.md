@@ -118,7 +118,7 @@ class User extends Model
 
 The `fileableLoader` is responsible for mapping your model to the required collection and indicates that you want to use Laravel Filable to manage your model files.
 
-The `fileableLoader()` method accepts and array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
+The `fileableLoader()` method accepts an array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
 
 #### Single collection initialization.
 
@@ -147,7 +147,7 @@ $this->fileableLoader('avatar', 'default');
 
 #### Default media.
 
-Default files are not loaded by default, to load the default file for the model the `fileableLoader` exposes a third parameter, the `useDefault` parameter, setting it to true will ensure that your default file is loaded when the model's file is not found or missing.
+COnfigured default files are not loaded by default, to load the default file for the model, the `fileableLoader` exposes a third parameter, the `useDefault` parameter, setting it to true will ensure that your default file is loaded when the model's file is not found or missing.
 
 ```php
 $this->fileableLoader('avatar', 'default', true);
@@ -161,11 +161,59 @@ $this->fileableLoader([
 ], 'default', true);
 ```
 
-#### Custom Database field.
-
 #### Supporting old setup (Legacy Mode)
 
-If you had your model running before the introducation of the the Fileable trait, you might still be able to load your existing files by passing a fourth parameter to the `fileableLoader()`, the **Legacy mode** attempts to load media files that had been stored or managed by a different logic before the introduction of the fileable trait.
+If you had your model running before the introducation of the the Fileable trait, you might still be able to load your existing files by passing a fourth parameter to the `fileableLoader()`, the **Legacy mode** attempts to load media files that had been stored or managed by a different logic or system before the introduction of the fileable trait.
+
+```php
+$this->fileableLoader('avatar', 'default', true, true);
+```
+
+OR
+
+```php
+$this->fileableLoader([
+    'avatar' => 'avatar',
+], 'default', true, true);
+```
+
+#### Custom Database field.
+
+There are times when you may want to use a different file name from your database field name, an instance could be when your request includes two diffrent file requests for different models that have the same database field names, the last parameter of the `fileableLoader` was added to support this scenario.
+
+The 5th parameter of the `fileableLoader` is a string that should equal to the database field where you want your file reference stored in or an array that maps the request file name to the database field name.
+
+Take a look at this example.
+
+```html
+<input name="cover" type="file" /> <input name="admin_avatar" type="file" />
+```
+
+```php
+$this->fileableLoader('admin_avatar', 'default', true, true, 'image');
+```
+
+OR
+
+```php
+$this->fileableLoader([
+    'admin_avatar' => 'avatar',
+], 'default', true, true, 'image');
+```
+
+OR
+
+```php
+$this->fileableLoader([
+    'cover' => 'cover',
+    'admin_avatar' => 'avatar',
+], 'default', true, true, [
+    'cover' => 'cover_image',
+    'admin_avatar' => 'image',
+]);
+```
+
+In the last example, `cover_image` is an existing database field mapped to the `cover` input request file name and `image` is an existing database field mapped to the `admin_avatar` input request file name.
 
 ### Model Events
 
