@@ -26,28 +26,7 @@ abstract class TestCase extends Orchestra
 
         config()->set('app.faker_locale', 'en_NG');
 
-        config()->set(
-            'kudi-notification.gateway',
-            $_SERVER['KUDISMS_GATEWAY'] ?? $_ENV['KUDISMS_GATEWAY'] ?? ''
-        );
-        config()->set(
-            'kudi-notification.api_key',
-            $_SERVER['KUDISMS_API_KEY'] ?? $_ENV['KUDISMS_API_KEY'] ?? ''
-        );
-        config()->set(
-            'kudi-notification.sender_id',
-            $_SERVER['KUDISMS_SENDER_ID'] ?? $_ENV['KUDISMS_SENDER_ID'] ?? ''
-        );
-        config()->set(
-            'kudi-notification.caller_id',
-            $_SERVER['KUDISMS_CALLER_ID'] ?? $_ENV['KUDISMS_CALLER_ID'] ?? config('kudi-notification.sender_id') ?? ''
-        );
-        config()->set(
-            'kudi-notification.test_numbers',
-            $_SERVER['KUDISMS_TEST_NUMBERS'] ?? $_ENV['KUDISMS_TEST_NUMBERS'] ?? ''
-        );
-
-        $migration = include __DIR__.'/database/migrations/create_users_tables.php';
+        $migration = include __DIR__ . '/database/migrations/create_users_tables.php';
         $migration->up();
     }
 
@@ -56,10 +35,10 @@ abstract class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'ToneflixCode\\KudiSmsNotification\\Tests\\Database\\Factories\\'.
-            class_basename(
-                $modelName
-            ).'Factory'
+            fn (string $modelName) => 'ToneflixCode\\LaravelFileable\\Tests\\Database\\Factories\\' .
+                class_basename(
+                    $modelName
+                ) . 'Factory'
         );
     }
 

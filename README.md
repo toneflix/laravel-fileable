@@ -114,7 +114,13 @@ class User extends Model
 
 ```
 
+### fileableLoader.
+
+The `fileableLoader` is responsible for mapping your model to the required collection and indicates that you want to use Laravel Filable to manage your model files.
+
 The `fileableLoader()` method accepts and array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
+
+#### Single collection initialization.
 
 ```php
 $this->fileableLoader([
@@ -122,7 +128,7 @@ $this->fileableLoader([
 ]);
 ```
 
-OR
+#### Multiple collection initialization.
 
 ```php
 $this->fileableLoader([
@@ -131,15 +137,31 @@ $this->fileableLoader([
 ]);
 ```
 
-The `fileableLoader()` method also accepts the `key` as a string as the first parameter and the `value` as a string as the second parameter.
+#### String parameter initialization.
+
+The `fileableLoader()` method also accepts the `key` as a string first parameter and the `value` as a string as the second parameter.
 
 ```php
 $this->fileableLoader('avatar', 'default');
 ```
 
-#### Loading|Not Loading default media.
+#### Default media.
 
-The third parameter of the `fileableLoader()` is a boolean value that determines wether to return null or the default image when the requested file is not found.
+Default files are not loaded by default, to load the default file for the model the `fileableLoader` exposes a third parameter, the `useDefault` parameter, setting it to true will ensure that your default file is loaded when the model's file is not found or missing.
+
+```php
+$this->fileableLoader('avatar', 'default', true);
+```
+
+OR
+
+```php
+$this->fileableLoader([
+    'avatar' => 'avatar',
+], 'default', true);
+```
+
+#### Custom Database field.
 
 #### Supporting old setup (Legacy Mode)
 
