@@ -1,7 +1,8 @@
 # Laravel Fileable
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/toneflix-code/laravel-fileable.svg?style=flat-round)](https://packagist.org/packages/toneflix-code/laravel-fileable)
-[![Total Downloads](https://img.shields.io/packagist/dt/toneflix-code/laravel-fileable.svg?style=flat-round)](https://packagist.org/packages/toneflix-code/laravel-fileable)
+[![Test & Lint](https://github.com/toneflix/laravel-fileable/actions/workflows/php.yml/badge.svg?branch=dev)](https://github.com/toneflix/laravel-fileable/actions/workflows/php.yml)
+[![Latest Stable Version](http://poser.pugx.org/toneflix-code/laravel-fileable/v)](https://packagist.org/packages/toneflix-code/laravel-fileable) [![Total Downloads](http://poser.pugx.org/toneflix-code/laravel-fileable/downloads)](https://packagist.org/packages/toneflix-code/laravel-fileable) [![Latest Unstable Version](http://poser.pugx.org/toneflix-code/laravel-fileable/v/unstable)](https://packagist.org/packages/toneflix-code/laravel-fileable) [![License](http://poser.pugx.org/toneflix-code/laravel-fileable/license)](https://packagist.org/packages/toneflix-code/laravel-fileable) [![PHP Version Require](http://poser.pugx.org/toneflix-code/laravel-fileable/require/php)](https://packagist.org/packages/toneflix-code/laravel-fileable)
+[![codecov](https://codecov.io/gh/toneflix/laravel-fileable/graph/badge.svg?token=2O7aFulQ9P)](https://codecov.io/gh/toneflix/laravel-fileable)
 
 <!-- ![GitHub Actions](https://github.com/toneflix/laravel-fileable/actions/workflows/main.yml/badge.svg) -->
 
@@ -15,7 +16,7 @@ You can install the package via composer:
 composer require toneflix-code/laravel-fileable
 ```
 
-## Installation
+## Package Discovery
 
 Laravel automatically discovers and publishes service providers but optionally after you have installed Laravel Fileable, open your Laravel config file config/app.php and add the following lines.
 
@@ -30,6 +31,16 @@ Add the facade of this package to the $aliases array.
 ```php
 'Fileable' => ToneflixCode\LaravelFileable\Facades\Fileable::class
 ```
+
+## Upgrading
+
+Version 2.x is not compatible with version 1.x, if you are ugrading from version 1.x here are a few notes:
+
+### Config
+
+1. If you published the configuration file, remove `image_templates`. Templates are no longer needed, just set you responsive image sizes using the `image_sizes` property.
+
+2. Add `responsive_image_route` and set the value `route/path/{file}/{size}`, `route/path` can be whatever you want it to be, `{file}/{size}` can be anything you want to name them but both are required.
 
 ## Configuration
 
@@ -103,7 +114,13 @@ class User extends Model
 
 ```
 
-The `fileableLoader()` method accepts and array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
+### fileableLoader.
+
+The `fileableLoader` is responsible for mapping your model to the required collection and indicates that you want to use Laravel Filable to manage your model files.
+
+The `fileableLoader()` method accepts an array of `[key => value]` pairs that determines which files should be auto discovered in your request, the `key` should match the name field in your input field E.g `<input type="file" name="avatar">`, the `value` should be an existing collection in your Laravel Fileable configuration.
+
+#### Single collection initialization.
 
 ```php
 $this->fileableLoader([
@@ -111,7 +128,7 @@ $this->fileableLoader([
 ]);
 ```
 
-OR
+#### Multiple collection initialization.
 
 ```php
 $this->fileableLoader([
@@ -120,19 +137,84 @@ $this->fileableLoader([
 ]);
 ```
 
-The `fileableLoader()` method also accepts the `key` as a string as the first parameter and the `value` as a string as the second parameter.
+#### String parameter initialization.
+
+The `fileableLoader()` method also accepts the `key` as a string first parameter and the `value` as a string as the second parameter.
 
 ```php
 $this->fileableLoader('avatar', 'default');
 ```
 
-#### Loading|Not Loading default media. 
+#### Default media.
 
-The third parameter of the `fileableLoader()` is a boolean value that determines wether to return null or the default image when the requested file is not found.
+COnfigured default files are not loaded by default, to load the default file for the model, the `fileableLoader` exposes a third parameter, the `useDefault` parameter, setting it to true will ensure that your default file is loaded when the model's file is not found or missing.
+
+```php
+$this->fileableLoader('avatar', 'default', true);
+```
+
+OR
+
+```php
+$this->fileableLoader([
+    'avatar' => 'avatar',
+], 'default', true);
+```
 
 #### Supporting old setup (Legacy Mode)
 
-If you had your model running before the introducation of the the Fileable trait, you might still be able to load your existing files by passing a fourth parameter to the `fileableLoader()`, the **Legacy mode** attempts to load media files that had been stored or managed by a different logic before the introduction of the fileable trait.
+If you had your model running before the introducation of the the Fileable trait, you might still be able to load your existing files by passing a fourth parameter to the `fileableLoader()`, the **Legacy mode** attempts to load media files that had been stored or managed by a different logic or system before the introduction of the fileable trait.
+
+```php
+$this->fileableLoader('avatar', 'default', true, true);
+```
+
+OR
+
+```php
+$this->fileableLoader([
+    'avatar' => 'avatar',
+], 'default', true, true);
+```
+
+#### Custom Database field.
+
+There are times when you may want to use a different file name from your database field name, an instance could be when your request includes two diffrent file requests for different models that have the same database field names, the last parameter of the `fileableLoader` was added to support this scenario.
+
+The 5th parameter of the `fileableLoader` is a string that should equal to the database field where you want your file reference stored in or an array that maps the request file name to the database field name.
+
+Take a look at this example.
+
+```html
+<input name="cover" type="file" /> <input name="admin_avatar" type="file" />
+```
+
+```php
+$this->fileableLoader('admin_avatar', 'default', true, true, 'image');
+```
+
+OR
+
+```php
+$this->fileableLoader([
+    'admin_avatar' => 'avatar',
+], 'default', true, true, 'image');
+```
+
+OR
+
+```php
+$this->fileableLoader([
+    'cover' => 'cover',
+    'admin_avatar' => 'avatar',
+], 'default', true, true, [
+    'cover' => 'cover_image',
+    'admin_avatar' => 'image',
+]);
+```
+
+In the last example, `cover_image` is an existing database field mapped to the `cover` input request file name and `image` is an existing database field mapped to the `admin_avatar` input request file name.
+
 
 ### Model Events
 
@@ -223,7 +305,6 @@ var_dump($post->responsive_images['banner']);
 #### Prefixed Media Collections
 
 While the library will try to resolve media files from the configured collection, you can also force media file search from collections different from the configured ones by saving the path reference on the database with a `collection:filename.ext` prefix, this will allow the system to look for media files in a collection named `collection` even if the current collection for the model is a collection named `images`;
-
 
 ### Testing
 

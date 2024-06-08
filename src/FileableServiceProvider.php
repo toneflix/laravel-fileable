@@ -3,6 +3,7 @@
 namespace ToneflixCode\LaravelFileable;
 
 use Illuminate\Support\ServiceProvider;
+
 use ToneflixCode\LaravelFileable\Intervention\Media1080;
 use ToneflixCode\LaravelFileable\Intervention\Media1080Square;
 use ToneflixCode\LaravelFileable\Intervention\Media431;

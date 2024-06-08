@@ -1,5 +1,6 @@
 <?php
 
+//
 return [
     'collections' => [
         'avatar' => [
@@ -49,11 +50,10 @@ return [
         'lg-square' => '720x720',
         'xl-square' => '1080x1080',
     ],
-    'file_route_secure_middleware' => 'web',
+    'file_route_secure_middleware' => 'window_auth',
+    'responsive_image_route' => 'images/responsive/{file}/{size}',
     'file_route_secure' => 'secure/files/{file}',
     'file_route_open' => 'open/files/{file}',
-    'image_templates' => [
-    ],
     'symlinks' => [
         public_path('avatars') => storage_path('app/public/avatars'),
         public_path('media') => storage_path('app/public/media'),

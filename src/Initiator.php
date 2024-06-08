@@ -13,7 +13,7 @@ class Initiator
      *
      * @return Collection<TKey, TValue>
      */
-    public static function collectionPaths(): array | Collection
+    public static function collectionPaths(): array|Collection
     {
         $deepPaths = collect(config('toneflix-fileable.collections', []))->map(function ($col, $key) {
             $getPath = Arr::get(config('toneflix-fileable.collections', []), $key.'.path');
@@ -41,7 +41,7 @@ class Initiator
     public static function asset(string $url, $absolute = false): string
     {
         if ($absolute) {
-            return str($url)->replace('http:', request()->isSecure() ? 'https:' :'http:')->toString();
+            return str($url)->replace('http:', request()->isSecure() ? 'https:' : 'http:')->toString();
         }
 
         return request()->isSecure()
