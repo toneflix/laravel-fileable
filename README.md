@@ -215,6 +215,7 @@ $this->fileableLoader([
 
 In the last example, `cover_image` is an existing database field mapped to the `cover` input request file name and `image` is an existing database field mapped to the `admin_avatar` input request file name.
 
+
 ### Model Events
 
 If you use listen to laravel events via the `boot()` you would need to move your event handles to the `registerEvents()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
@@ -325,8 +326,8 @@ If you discover any security related issues, please email code@toneflix.com.ng i
 
 ## Credits
 
-- [Toneflix Code](https://github.com/toneflix)
-- [All Contributors](../../contributors)
+-   [Toneflix Code](https://github.com/toneflix)
+-   [All Contributors](../../contributors)
 
 ## License
 

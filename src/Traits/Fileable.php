@@ -62,6 +62,16 @@ trait Fileable
      */
     protected bool $applyDefault = false;
 
+    /**
+     * Legacy mode is used to support media files that were saved before the introduction of the fileable trait
+     */
+    protected bool $legacyMode = false;
+
+    /**
+     * Apply default image if no image is found
+     */
+    protected bool $applyDefault = false;
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);

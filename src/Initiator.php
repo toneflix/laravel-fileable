@@ -35,6 +35,8 @@ class Initiator
 
     /**
      * Load public asset
+     *
+     * @return string
      */
     public static function asset(string $url, $absolute = false): string
     {

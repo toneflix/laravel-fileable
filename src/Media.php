@@ -69,7 +69,7 @@ class Media
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             $port = parse_url($src, PHP_URL_PORT);
-            $url = str($src)->replace('localhost:'.$port, 'localhost');
+            $url = str($src)->replace('localhost:' . $port, 'localhost');
 
             if ($returnPath === true) {
                 return parse_url($src, PHP_URL_PATH);
@@ -115,6 +115,10 @@ class Media
 
     /**
      * Check if the file exists
+     *
+     * @param  string  $type
+     * @param  string  $src
+     * @return bool
      */
     public function exists(string $type, string $src = null): bool
     {
@@ -130,6 +134,9 @@ class Media
 
     /**
      * Get the relative path of the file
+     * @param  string  $type
+     * @param  string  $src
+     * @return string
      */
     public function getPath(string $type, string $src = null): ?string
     {
@@ -156,8 +163,8 @@ class Media
 
     public function getDefaultMedia(string $type): string
     {
-        $default = Arr::get($this->namespaces, $type.'.default');
-        $path = Arr::get($this->namespaces, $type.'.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
+        $path = Arr::get($this->namespaces, $type . '.path');
 
         if (filter_var($default, FILTER_VALIDATE_URL)) {
             return $default;
@@ -203,10 +210,10 @@ class Media
     public function save(string $type, string $file_name = null, $old = null, $index = null): ?string
     {
         // Get the file path
-        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
 
         // Get the file path prefix
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         $request = request();
         $old_path = $prefix.$getPath.$old;
@@ -224,7 +231,7 @@ class Media
             }
 
             // Give the file a new name and append extension
-            $rename = rand().'_'.rand().'.'.$requestFile->extension();
+            $rename = rand() . '_' . rand() . '.' . $requestFile->extension();
 
             $this->disk->putFileAs(
                 $prefix.$getPath, // Path
@@ -393,10 +400,10 @@ class Media
      */
     public function delete(string $type, string $src = null): ?string
     {
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
-        $path = $prefix.$getPath.$src;
+        $path = $prefix . $getPath . $src;
 
         if ($src && $this->disk->exists($path) && $src !== 'default.png') {
             $this->disk->delete($path);
