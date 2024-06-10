@@ -215,7 +215,6 @@ $this->fileableLoader([
 
 In the last example, `cover_image` is an existing database field mapped to the `cover` input request file name and `image` is an existing database field mapped to the `admin_avatar` input request file name.
 
-
 ### Model Events
 
 If you use listen to laravel events via the `boot()` you would need to move your event handles to the `registerEvents()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
@@ -306,6 +305,42 @@ var_dump($post->responsive_images['banner']);
 
 While the library will try to resolve media files from the configured collection, you can also force media file search from collections different from the configured ones by saving the path reference on the database with a `collection:filename.ext` prefix, this will allow the system to look for media files in a collection named `collection` even if the current collection for the model is a collection named `images`;
 
+### Manually saving files
+
+You can also skip the interface and use the `save` method of `Media` library to manually create your files, the `save` method returns the name of the file as saved in your configured storage.
+
+```php
+use ToneflixCode\LaravelFileable\Media;
+use App\Models\User;
+
+$user = User::find(1);
+
+$user->image = (new Media())->save('media', "image", $user->image);
+$user->saveQuietly();
+```
+
+In the above example `media` is the target collection where your file should be saved while `image` is the name of the input from the request holding your file.
+
+#### Manually saving from wildcard request array.
+
+Consider the following scenario in a controller.
+
+```php
+['forms' => $forms] = $this->validate($request, [
+    'users.*.id' => ['required', 'exists:users,id'],
+    'users.*.image' => ['nullable', 'image', 'mimes:png,jpg'],
+]);
+
+foreach ($forms as $i => $form) {
+    $user = User::find($form['id']);
+
+    $user->image = (new Media())->save('media', "users.*.image", $user->image, $i);
+    $user->saveQuietly();
+}
+```
+
+What we have done is save the files from within a loop, the 4th parameter of the `save` method [`index`] indicates where the file we want to save can be found in the requests uploaded file list.
+
 ### Testing
 
 ```bash
@@ -326,8 +361,8 @@ If you discover any security related issues, please email code@toneflix.com.ng i
 
 ## Credits
 
--   [Toneflix Code](https://github.com/toneflix)
--   [All Contributors](../../contributors)
+- [Toneflix Code](https://github.com/toneflix)
+- [All Contributors](../../contributors)
 
 ## License
 
