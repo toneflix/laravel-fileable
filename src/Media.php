@@ -203,11 +203,14 @@ class Media
     }
 
     /**
-     * Fetch a file from the storage
+     * Save a file to the storage
      *
-     * @param  string  $old
+     * @param  string  $type
+     * @param  ?string  $file_name
+     * @param  ?string  $old
+     * @param  ?string  $index
      */
-    public function save(string $type, string $file_name = null, $old = null, $index = null): ?string
+    public function save(string $type, ?string $file_name = null, ?string $old = null, ?string $index = null): ?string
     {
         // Get the file path
         $getPath = Arr::get($this->namespaces, $type . '.path');
@@ -281,9 +284,12 @@ class Media
     /**
      * Save a base64 encoded image string to storage
      *
-     * @param  string  $old
+     * @param  string  $type
+     * @param  ?string  $encoded_string
+     * @param  ?string  $old
+     * @param  ?string  $index
      */
-    public function saveEncoded(string $type, string $encoded_string = null, $old = null, $index = null): ?string
+    public function saveEncoded(string $type, ?string $encoded_string = null, ?string $old = null, ?string $index = null): ?string
     {
         if (!$encoded_string) {
             return null;

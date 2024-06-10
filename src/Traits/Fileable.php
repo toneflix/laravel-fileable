@@ -52,11 +52,6 @@ trait Fileable
     public string|array $file_name = 'file';
 
     /**
-     * Legacy mode is used to support media files that were saved before the introduction of the fileable trait
-     */
-    protected bool $legacyMode = false;
-
-    /**
      * Apply default file if no file is found
      * If set to false missing files will not be replaced with the default URL
      */
@@ -66,11 +61,6 @@ trait Fileable
      * Legacy mode is used to support media files that were saved before the introduction of the fileable trait
      */
     protected bool $legacyMode = false;
-
-    /**
-     * Apply default image if no image is found
-     */
-    protected bool $applyDefault = false;
 
     public function __construct(array $attributes = [])
     {
