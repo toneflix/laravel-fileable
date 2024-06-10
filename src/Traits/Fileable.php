@@ -1,422 +1,466 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable;
+namespace ToneflixCode\LaravelFileable\Traits;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\ImageManager;
+use ToneflixCode\LaravelFileable\Media;
 
-class Media
+/**
+ * A collection of usefull model manipulation classes.
+ */
+trait Fileable
 {
     public $namespaces;
 
-    public $globalDefault = false;
+    /**
+     * THe prefered disk for this instance
+     */
+    public ?string $disk = null;
 
-    public $default_media = 'media/default.png';
+    /**
+     * An array of responsive image breakpoints
+     *
+     * @var array<string,string>
+     */
+    public array $sizes;
 
-    public \Intervention\Image\ImageManager $imageDriver;
+    /**
+     * The name of the collection where files for the model should be stored in
+     */
+    public string $collection = 'image';
 
-    public \Illuminate\Contracts\Filesystem\Filesystem $disk;
+    /**
+     * The field in the DB where the file reference should be saved
+     * If this is an array, the field should be mapped to the $file_name property
+     *
+     * @example db_field $db_field = ['image' => 'avatar'];
+     * In this case avatar is an existing DB field and image will be the filename from the request
+     *
+     * @var string|array<string,string>|null
+     */
+    public string|array|null $db_field = '';
 
-    public function __construct($storageDisc = null)
+    /**
+     * An array mapping of file name (file request param) and colletion name
+     * Or a file name (file request param) string
+     *
+     * @var string|array<string,string>
+     */
+    public string|array $file_name = 'file';
+
+    /**
+     * Legacy mode is used to support media files that were saved before the introduction of the fileable trait
+     */
+    protected bool $legacyMode = false;
+
+    /**
+     * Apply default file if no file is found
+     * If set to false missing files will not be replaced with the default URL
+     */
+    protected bool $applyDefault = false;
+
+    /**
+     * Legacy mode is used to support media files that were saved before the introduction of the fileable trait
+     */
+    protected bool $legacyMode = false;
+
+    /**
+     * Apply default image if no image is found
+     */
+    protected bool $applyDefault = false;
+
+    public function __construct(array $attributes = [])
     {
+        parent::__construct($attributes);
+        $this->sizes = config('toneflix-fileable.image_sizes');
         $this->namespaces = config('toneflix-fileable.collections');
-
-        $this->globalDefault = true;
-
-        $this->imageDriver = new ImageManager(new Driver());
-
-        $this->disk = Storage::disk($storageDisc ?? Storage::getDefaultDriver());
+        $this->registerFileable();
     }
 
-    /**
-     * Fetch an file from the storage
-     *
-     * @deprecated 1.1.0 Use getMedia() instead.
-     */
-    public function image(string $type, string $src = null): ?string
+    public static function boot()
     {
-        return $this->getMedia($type, $src);
-    }
+        parent::boot();
 
-    /**
-     * Fetch an file from the storage
-     *
-     * @param  string  $type    The type of file to fetch (This will be the configured collection)
-     * @param  string  $src     The file name
-     * @param  bool  $returnPath  If true the method will return the relative path of the file
-     * @param  bool  $legacyMode  If true the method will remove the file path from the $src
-     */
-    public function getMedia(string $type, string $src = null, $returnPath = false, $legacyMode = false): ?string
-    {
-        if ($legacyMode) {
-            $src = str($src)->afterLast('/')->__toString();
-        }
+        static::registerEvents();
 
-        if (str($src)->contains(':') && !str($src)->contains('http')) {
-            $type = str($src)->before(':')->__toString();
-            $src = str($src)->after(':')->__toString();
-        }
-
-        $getPath = Arr::get($this->namespaces, $type . '.path');
-        $default = Arr::get($this->namespaces, $type . '.default');
-
-        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
-
-        if (filter_var($src, FILTER_VALIDATE_URL)) {
-            $port = parse_url($src, PHP_URL_PORT);
-            $url = str($src)->replace('localhost:' . $port, 'localhost');
-
-            if ($returnPath === true) {
-                return parse_url($src, PHP_URL_PATH);
+        static::saved(function (Fileable|Model $model) {
+            if (is_array($model->file_name)) {
+                foreach ($model->file_name as $file => $collection) {
+                    $model->saveImage($file, $collection);
+                }
+            } else {
+                $model->saveImage($model->file_name, $model->collection);
             }
+        });
 
-            return Initiator::asset($url->replace('localhost', request()->getHttpHost()), true);
-        }
+        static::deleting(function (Fileable|Model $model) {
+            if (is_array($model->file_name)) {
+                foreach ($model->file_name as $file => $collection) {
+                    $model->removeFile($file, $collection);
+                }
+            } else {
+                $model->removeFile($model->file_name, $model->collection);
+            }
+        });
+    }
 
-        if (!$src || !$this->disk->exists($prefix . $getPath . $src)) {
-            if (filter_var($default, FILTER_VALIDATE_URL)) {
-                if ($returnPath === true) {
-                    return parse_url($default, PHP_URL_PATH);
+    /**
+     *  Returns a list of all bound files.
+     *
+     * @deprecated  1.0.0    Use files instead, will be removed from future versions
+     */
+    public function images(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->files,
+        );
+    }
+
+    /**
+     *  Returns a list of all bound files.
+     */
+    public function files(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                if (is_array($this->file_name)) {
+                    $files = [];
+                    foreach ($this->file_name as $file => $collection) {
+                        $files[$file] = $this->retrieveFile($file, $collection);
+                    }
+
+                    return $files;
+                } else {
+                    return [$this->file_name => $this->retrieveFile($this->file_name, $this->collection)];
+                }
+            },
+        );
+    }
+
+    /**
+     *  Returns a single media file from list of all bound files.
+     */
+    public function mediaFile(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                $file = null;
+                // If the file name is an array, get the first file
+                if (is_array($this->file_name)) {
+                    foreach ($this->file_name as $file => $collection) {
+                        $file_name = $file;
+                        $collection = $collection;
+                        break;
+                    }
+                } else {
+                    $file_name = $this->file_name;
+                    $collection = $this->collection;
                 }
 
-                return $default;
-            } elseif (!$this->disk->exists($prefix . $getPath . $default)) {
-                if ($returnPath === true) {
-                    return $this->default_media;
+                return $this->retrieveFile($file_name, $collection) ?? (new Media())->getDefaultMedia($collection);
+            },
+        );
+    }
+
+    /**
+     *  Returns the attribute of a single bound media file.
+     */
+    public function mediaFileInfo(): Attribute
+    {
+        return new Attribute(
+            get: function () {
+                $file = null;
+                // If the file name is an array, get the first file
+                if (is_array($this->file_name)) {
+                    foreach ($this->file_name as $file => $collection) {
+                        $file_name = $file;
+                        $collection = $collection;
+                        break;
+                    }
+                } else {
+                    $file_name = $this->file_name;
+                    $collection = $this->collection;
                 }
 
-                return Initiator::asset($this->default_media);
-            }
+                $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
+                $file_path = $prefix . $this->retrieveFile($file_name, $collection, true);
 
-            if ($returnPath === true) {
-                return Initiator::asset($getPath . $default, true);
-            }
+                $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
+                $isImage = str($mime)->contains('image');
 
-            return Initiator::asset($getPath . $default);
-        }
+                $file_url = $this->retrieveFile($file_name, $collection) ?? (new Media())->getDefaultMedia($collection);
 
-        if ($returnPath === true) {
-            return Initiator::asset($getPath . $src, true);
-        } elseif (str($type)->contains('private.')) {
-            $secure = Arr::get($this->namespaces, $type . '.secure', false) === true ? 'secure' : 'open';
-
-            return Initiator::asset(route("fileable.{$secure}.file", [
-                'file' => base64url_encode($getPath . $src),
-            ]), true);
-        }
-
-        return Initiator::asset($getPath . $src);
+                return [$file_name => [
+                    'isImage' => $isImage,
+                    'path' => $file_path,
+                    'url' => $file_url,
+                    'mime' => $mime,
+                    'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                ]];
+            },
+        );
     }
 
     /**
-     * Check if the file exists
-     *
-     * @param  string  $type
-     * @param  string  $src
-     * @return bool
+     *  Returns the default image for the model as an attribute
      */
-    public function exists(string $type, string $src = null): bool
+    public function defaultImage(): Attribute
     {
-        $getPath = Arr::get($this->namespaces, $type . '.path');
-        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
+        return Attribute::make(
+            get: fn () => ($this->collection
+                ? (new Media($this->disk))->getDefaultMedia($this->collection)
+                : asset('media/default.jpg')
+            )
+        );
+    }
 
-        if (!$src || !$this->disk->exists($prefix . $getPath . $src)) {
-            return false;
-        }
+    public function responsiveImages(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if (is_array($this->file_name)) {
+                    $images = [];
+                    foreach ($this->file_name as $file => $collection) {
+                        $images[$file] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($file, $collection) {
+                            $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
 
-        return true;
+                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($file, $collection, true)))
+                                ->contains('image');
+
+                            if (!$isImage) {
+                                return [$key => $this->default_image];
+                            }
+
+                            $asset = pathinfo($this->retrieveFile($file, $collection), PATHINFO_BASENAME);
+
+                            return [$key => route('imagecache', [$size, $asset])];
+                        });
+                    }
+
+                    return $images;
+                } else {
+                    return collect($this->sizes)->mapWithKeys(function ($size, $key) {
+                        $prefix = !str($this->collection)->contains('private.') ? 'public/' : '/';
+                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_name, $this->collection, true)))
+                            ->contains('image');
+
+                        if (!$isImage) {
+                            return [$key => $this->default_image];
+                        }
+
+                        $asset = pathinfo($this->retrieveFile($this->file_name, $this->collection), PATHINFO_BASENAME);
+
+                        return [$key = route('imagecache', [$size, $asset])];
+                    });
+                }
+            },
+        );
     }
 
     /**
-     * Get the relative path of the file
-     * @param  string  $type
-     * @param  string  $src
-     * @return string
+     *  Returns a list of bound files with a little more detal.
      */
-    public function getPath(string $type, string $src = null): ?string
+    public function getFiles(): Attribute
     {
-        $getPath = Arr::get($this->namespaces, $type . '.path');
-        $default = Arr::get($this->namespaces, $type . '.default');
-        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
+        return new Attribute(
+            get: function () {
+                if (is_array($this->file_name)) {
+                    $files = [];
+                    foreach ($this->file_name as $file => $collection) {
+                        $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
+                        $file_path = $prefix . $this->retrieveFile($file, $collection, true);
 
-        if (filter_var($src, FILTER_VALIDATE_URL)) {
-            return parse_url($src, PHP_URL_PATH);
-        }
+                        $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
+                        $isImage = str($mime)->contains('image');
+                        $file_url = $this->retrieveFile($file, $collection);
 
-        if (!$src || !$this->disk->exists($prefix . $getPath . $src)) {
-            if (filter_var($default, FILTER_VALIDATE_URL)) {
-                return parse_url($default, PHP_URL_PATH);
-            } elseif (!$this->disk->exists($prefix . $getPath . $default)) {
-                return $this->default_media;
-            }
+                        $files[$file] = [
+                            'isImage' => $isImage,
+                            'path' => $file_path,
+                            'url' => $file_url,
+                            'mime' => $mime,
+                            'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                        ];
+                    }
 
-            return $getPath . $default;
-        }
+                    return $files;
+                } else {
+                    $prefix = !str($this->collection)->contains('private.') ? 'public/' : '/';
+                    $file_path = $prefix . $this->retrieveFile($this->file_name, $this->collection, true);
 
-        return $getPath . $src;
-    }
+                    $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
+                    $isImage = str($mime)->contains('image');
 
-    public function getDefaultMedia(string $type): string
-    {
-        $default = Arr::get($this->namespaces, $type . '.default');
-        $path = Arr::get($this->namespaces, $type . '.path');
+                    $file_url = $this->retrieveFile($this->file_name, $this->collection);
 
-        if (filter_var($default, FILTER_VALIDATE_URL)) {
-            return $default;
-        }
-
-        return Initiator::asset($path . $default);
+                    return [$this->file_name => [
+                        'isImage' => $isImage,
+                        'path' => $file_path,
+                        'url' => $file_url,
+                        'mime' => $mime,
+                        'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                    ]];
+                }
+            },
+        );
     }
 
     /**
-     * Render the private file
+     * All extra model events should be registered here instead of on the model
+     * Overite this method on the model
      *
      * @return void
      */
-    public function privateFile(string $file)
+    public static function registerEvents()
     {
-        $src = base64url_decode($file);
-
-        if ($this->disk->exists($src)) {
-            $mime = $this->disk->mimeType($src);
-
-            // create response and add encoded image data
-            if (str($mime)->contains('image')) {
-                return response()->file($this->disk->path($src), [
-                    'Cross-Origin-Resource-Policy' => 'cross-origin',
-                    'Access-Control-Allow-Origin' => '*',
-                ]);
-            } else {
-                $response = Response::make($this->disk->get($src));
-
-                // set headers
-                return $response->header('Content-Type', $mime)
-                    ->header('Cross-Origin-Resource-Policy', 'cross-origin')
-                    ->header('Access-Control-Allow-Origin', '*');
-            }
-        }
     }
 
     /**
-     * Fetch a file from the storage
-     *
-     * @param  string  $old
+     * Register all required dependencies here
      */
-    public function save(string $type, string $file_name = null, $old = null, $index = null): ?string
+    public function registerFileable(): void
     {
-        // Get the file path
-        $getPath = Arr::get($this->namespaces, $type . '.path');
-
-        // Get the file path prefix
-        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
-
-        $request = request();
-        $old_path = $prefix . $getPath . $old;
-
-        // Adds support for saving files from an array index using wildcard request access
-        $fn = str($file_name);
-        $fileKey = $fn->replace('.*.', ".$index.")->toString();
-        $fileList = $fn->contains('.*.') ? Arr::dot($request->allFiles()) : null;
-
-        if ($request->hasFile($file_name) && (!$index || isset($fileList[$fileKey]))) {
-            if ($old && $this->disk->exists($old_path) && $old !== 'default.png') {
-                $this->disk->delete($old_path);
-            }
-
-            // If an index is provided get the file from the array by index
-            // This is useful when you have multiple files with the same name
-            if (isset($fileList[$fileKey])) {
-                $requestFile = $fileList[$fileKey];
-            } else if ($index !== null && isset($request->file($file_name)[$index])) {
-                $requestFile = $request->file($file_name)[$index];
-            } else {
-                $requestFile = $request->file($file_name);
-            }
-
-            // Give the file a new name and append extension
-            $rename = rand() . '_' . rand() . '.' . $requestFile->extension();
-
-            $this->disk->putFileAs(
-                $prefix . $getPath, // Path
-                $requestFile, // Request File
-                $rename // Directory
-            );
-
-            // Reset the file instance
-            $request->offsetUnset($file_name);
-
-            // If the file is an image resize it
-            $size = Arr::get($this->namespaces, $type . '.size');
-
-            $mime = $this->disk->mimeType($prefix . $getPath . $rename);
-
-            $size = Arr::get($this->namespaces, $type . '.size');
-
-            // If the file is an image resize it if size is available
-            if ($size && str($mime)->contains('image')) {
-                $this->imageDriver->read($this->disk->path($prefix . $getPath . $rename))
-                    ->cover(Arr::first($size), Arr::last($size))
-                    ->save();
-            }
-
-            // Return the new file name
-            return $rename;
-        } elseif ($request->has($file_name)) {
-            if ($old && $this->disk->exists($old_path) && $old !== 'default.png') {
-                $this->disk->delete($old_path);
-            }
-
-            return null;
-        }
-
-        // If no file is provided return the old file name
-        return $old;
+        $this->fileableLoader('file', 'default');
     }
 
     /**
-     * Save a base64 encoded image string to storage
+     * All fileable properties should be registered
      *
-     * @param  string  $old
+     * @param  string|array<string,string>  $file_name   filename | [filename => collection]
+     * @param  string  $collection  The name of the collection where files for the model should be stored in
+     * @param  string  $applyDefault  If set to false missing files will not be replaced with the default URL
+     * @param  bool  $legacyMode Support media files that were saved before the introduction of the fileable trait
+     * @param  string|array|null  $db_field  The field in the DB where the file reference should be saved
+     * @return void
      */
-    public function saveEncoded(string $type, string $encoded_string = null, $old = null, $index = null): ?string
-    {
-        if (!$encoded_string) {
-            return null;
-        }
+    public function fileableLoader(
+        string|array $file_name = 'file',
+        string $collection = 'default',
+        bool $applyDefault = false,
+        bool $legacyMode = false,
+        string|array $db_field = null,
+    ) {
+        if (is_array($file_name)) {
+            foreach ($file_name as $file => $collection) {
+                if (is_array($collection)) {
+                    throw new \ErrorException('Your collection should be a string');
+                }
 
-        // Get the file path
-        $getPath = Arr::get($this->namespaces, $type . '.path');
+                $collect = Arr::get((new Media($this->disk))->namespaces, $collection);
 
-        // Get the file path prefix
-        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
-
-        $old_path = $prefix . $getPath . $old;
-
-        // Delete the old file
-        if ($old && $this->disk->exists($old_path) && $old !== 'default.png') {
-            $this->disk->delete($old_path);
-        }
-
-        // Check if the string has a base64 prefix and remove it
-        if (str($encoded_string)->contains('base64,')) {
-            $encoded_string = str($encoded_string)->after('base64,')->__toString();
-        }
-
-        // Decode the string
-        $imgdata = base64_decode($encoded_string);
-
-        // Get the file extension
-        $ext = str(finfo_buffer(finfo_open(), $imgdata, FILEINFO_EXTENSION))->before('/')->toString();
-
-        // Get the file extension
-        $extension = collect([
-            '' => 'png',
-            '???' => str($encoded_string)->between('/', ';')->toString(),
-            'svg+xml' => 'svg',
-            'jpeg' => 'jpg',
-            'plain' => 'txt',
-            'octet-stream' => 'bin',
-        ])->get($ext, $ext);
-
-        // Give the file a new name and append extension
-        $rename = rand() . '_' . rand() . '.' . $extension;
-        $path = $prefix . trim($getPath, '/') . '/' . $rename;
-
-        // Store the file
-        $this->disk->put($path, base64_decode($encoded_string));
-
-        return $rename;
-    }
-
-    /**
-     * Save or retrieve an image from cache
-     *
-     * @return array{cc:string,mm:string}|null
-     */
-    public function cached(string $fileName): ?array
-    {
-        $file = null;
-        $content = null;
-
-        Cache::delete("fileable.$fileName");
-
-        // Check if the file exists in cache
-        if (Cache::has("fileable.$fileName")) {
-            $content = Cache::get("fileable.$fileName");
-        } else {
-            // Loop through all the filesystems.links to find the file
-            foreach (collect(config('filesystems.links'))->values() as $path) {
-                $file = collect(File::allFiles($path))
-                    ->firstWhere(fn ($e) => $e->getFilename() === $fileName && str(File::mimeType($e))->contains('image'));
-
-                if (!$file) {
-                    continue;
+                if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
+                    throw new \ErrorException("$collection is not a valid collection");
                 }
             }
+        }
 
-            // Save the file to cache
-            if ($file) {
-                $content = ['cc' => $file->getContents(), 'mm' => File::mimeType($file)];
-                Cache::put("fileable.$fileName", $content);
+        if (is_array($collection)) {
+            throw new \ErrorException('Your collection should be a string');
+        }
+
+        $collect = Arr::get((new Media($this->disk))->namespaces, $collection);
+
+        if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
+            throw new \ErrorException("$collection is not a valid collection");
+        }
+        $this->applyDefault = $applyDefault;
+        $this->legacyMode = $legacyMode;
+        $this->collection = $collection;
+        $this->file_name = $file_name;
+        $this->db_field = $db_field ?? $this->db_field;
+    }
+
+    /**
+     * Add an image to the storage media collection
+     *
+     * @param  string|array  $request_file_name
+     */
+    public function saveImage(string|array $file_name = null, string $collection = 'default')
+    {
+        $request = request();
+
+        $file_name = $file_name ?? $this->file_name;
+        if (is_array($file_name)) {
+            foreach ($file_name as $file => $collection) {
+                if ($this->checkBase64($request->get($file))) {
+                    $save_name = (new Media($this->disk))
+                        ->saveEncoded($collection, $request->get($file), $this->{$this->getFieldName($file)});
+                } else {
+                    $save_name = (new Media($this->disk))
+                        ->save($collection, $file, $this->{$this->getFieldName($file)});
+                }
+                // This maps to $this->image = $save_name where image is an existing database field
+                $this->{$this->getFieldName($file)} = $save_name;
+                $this->saveQuietly();
             }
+        } else {
+            if ($this->checkBase64($request->get($file_name))) {
+                $save_name = (new Media($this->disk))
+                    ->saveEncoded($collection, $request->get($file_name), $this->{$this->getFieldName($file_name)});
+            } else {
+                $save_name = (new Media($this->disk))
+                    ->save($collection, $file_name, $this->{$this->getFieldName($file_name)});
+            }
+            // This maps to $this->image = $save_name where image is an existing database field
+            $this->{$this->getFieldName($file_name)} = $save_name;
+            $this->saveQuietly();
         }
+    }
 
-        return $content;
+    public function checkBase64($file): bool
+    {
+        return (bool) preg_match('/^data:image\/(\w+);base64,/', $file);
     }
 
     /**
-     * Fetch the given image from the cache and resize it.
+     * Load an image from the storage media collection
+     *
+     * @param  bool  $getPath
      */
-    public function resizeResponse(string $fileName, string $size): \Illuminate\Http\Response
+    public function retrieveFile(string $file_name = 'file', string $collection = 'default', bool $returnPath = false)
     {
-        $cached = $this->cached($fileName);
-
-        if ($cached) {
-            // Get the image resolution
-            $res = explode(
-                'x',
-                config(
-                    "toneflix-fileable.image_sizes.$size",
-                    config('toneflix-fileable.image_sizes.md', '694')
-                )
-            );
-
-            // Resize the image
-            $resized = $this->imageDriver->read($cached['cc'])
-                ->cover(Arr::first($res), Arr::last($res))
-                ->encode();
-
-            // Make the Http Response
-            $response = Response::make($resized);
-
-            // set the headers
-            return $response->header('Content-Type', $cached['mm'])
-                ->header('Cross-Origin-Resource-Policy', 'cross-origin')
-                ->header('Access-Control-Allow-Origin', '*');
+        if ($this->getFieldName($file_name)) {
+            return (new Media($this->disk))
+                ->getMedia($collection, $this->{$this->getFieldName($file_name)}, $returnPath);
         }
 
-        return abort(404);
+        if ($this->applyDefault) {
+            return (new Media($this->disk))->getDefaultMedia($collection);
+        }
+
+        return null;
     }
 
     /**
-     * Delete a file from the storage
+     * Delete an image from the storage media collection
      */
-    public function delete(string $type, string $src = null): ?string
+    public function removeFile(string|array $file_name = null, string $collection = 'default')
     {
-        $getPath = Arr::get($this->namespaces, $type . '.path');
-        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
+        $file_name = $file_name ?? $this->file_name;
+        if (is_array($file_name)) {
+            foreach ($file_name as $file => $collection) {
+                return (new Media($this->disk))
+                    ->delete($collection, $this->{$this->getFieldName($file)});
+            }
+        } else {
+            return (new Media($this->disk))
+                ->delete($collection, $this->{$this->getFieldName($file_name)});
+        }
+    }
 
-        $path = $prefix . $getPath . $src;
-
-        if ($src && $this->disk->exists($path) && $src !== 'default.png') {
-            $this->disk->delete($path);
+    protected function getFieldName(string $file_name): string
+    {
+        if (!$this->db_field) {
+            return $file_name;
         }
 
-        return $path;
+        if (is_array($this->db_field)) {
+            return $this->db_field[$file_name] ?? $file_name;
+        }
+
+        return $this->db_field ?? $file_name;
     }
 }
