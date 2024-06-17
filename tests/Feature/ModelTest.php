@@ -10,5 +10,6 @@ test('has-avatar', function () {
 
     expect($image !== '')->toBeTrue();
     expect($image !== null)->toBeTrue();
+    dd($user->mediaFileInfo);
     // expect(mb_stripos($image, 'default.') === false)->toBeTrue();
 });

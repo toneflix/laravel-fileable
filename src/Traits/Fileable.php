@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
+use ToneflixCode\LaravelFileable\Initiator;
 use ToneflixCode\LaravelFileable\Media;
 
 /**
@@ -182,6 +183,8 @@ trait Fileable
                 $isImage = str($mime)->contains('image');
 
                 $file_url = $this->retrieveFile($file_name, $collection) ?? (new Media())->getDefaultMedia($collection);
+                $dynamicLink = route('fileable.open.file', Initiator::base64urlEncode($file_path));
+                $secureLink = route('fileable.secure.file', Initiator::base64urlEncode($file_path));
 
                 return [$file_name => [
                     'isImage' => $isImage,
@@ -189,6 +192,8 @@ trait Fileable
                     'url' => $file_url,
                     'mime' => $mime,
                     'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                    'dynamicLink' => $dynamicLink,
+                    'secureLink' => $secureLink,
                 ]];
             },
         );
@@ -266,6 +271,8 @@ trait Fileable
                         $mime = Storage::exists($file_path) ? Storage::mimeType($file_path) : null;
                         $isImage = str($mime)->contains('image');
                         $file_url = $this->retrieveFile($file, $collection);
+                        $dynamicLink = route('fileable.open.file', Initiator::base64urlEncode($file_path));
+                        $secureLink = route('fileable.secure.file', Initiator::base64urlEncode($file_path));
 
                         $files[$file] = [
                             'isImage' => $isImage,
@@ -273,6 +280,8 @@ trait Fileable
                             'url' => $file_url,
                             'mime' => $mime,
                             'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                            'dynamicLink' => $dynamicLink,
+                            'secureLink' => $secureLink,
                         ];
                     }
 
@@ -285,6 +294,8 @@ trait Fileable
                     $isImage = str($mime)->contains('image');
 
                     $file_url = $this->retrieveFile($this->file_name, $this->collection);
+                    $dynamicLink = route('fileable.open.file', Initiator::base64urlEncode($file_path));
+                    $secureLink = route('fileable.secure.file', Initiator::base64urlEncode($file_path));
 
                     return [$this->file_name => [
                         'isImage' => $isImage,
@@ -292,6 +303,8 @@ trait Fileable
                         'url' => $file_url,
                         'mime' => $mime,
                         'size' => $mime && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+                        'dynamicLink' => $dynamicLink,
+                        'secureLink' => $secureLink,
                     ]];
                 }
             },
