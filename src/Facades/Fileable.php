@@ -12,7 +12,7 @@ use ToneflixCode\LaravelFileable\Media;
  * @method bool exists(string $type, string $src = null) Check if the file exists
  * @method ?string getPath(string $type, string $src = null) Get the relative path of the file
  * @method string getDefaultMedia(string $type)
- * @method string privateFile() Render the private file
+ * @method string dynamicFile() Render the private file
  * @method ?string save(string $type, ?string $file_name = null, ?string $old = null, ?string $index = null) Save a file to the storage
  * @method ?string saveEncoded(string $type, ?string $encoded_string = null, ?string $old = null, ?string $index = null)
  * @method array{cc:string,mm:string}|null cached(string $fileName) Save or retrieve a file from cache

@@ -178,27 +178,16 @@ class Media
      *
      * @return void
      */
-    public function privateFile(string $file)
+    public function dynamicFile(string $file)
     {
-        $src = base64url_decode($file);
+        $src = Initiator::base64urlDecode($file);
 
         if ($this->disk->exists($src)) {
-            $mime = $this->disk->mimeType($src);
-
-            // create response and add encoded image data
-            if (str($mime)->contains('image')) {
-                return response()->file($this->disk->path($src), [
-                    'Cross-Origin-Resource-Policy' => 'cross-origin',
-                    'Access-Control-Allow-Origin' => '*',
-                ]);
-            } else {
-                $response = Response::make($this->disk->get($src));
-
-                // set headers
-                return $response->header('Content-Type', $mime)
-                    ->header('Cross-Origin-Resource-Policy', 'cross-origin')
-                    ->header('Access-Control-Allow-Origin', '*');
-            }
+            // create response and add encoded file data
+            return response()->file($this->disk->path($src), [
+                'Cross-Origin-Resource-Policy' => 'cross-origin',
+                'Access-Control-Allow-Origin' => '*',
+            ]);
         }
     }
 
