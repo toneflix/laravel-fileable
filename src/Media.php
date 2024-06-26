@@ -399,7 +399,41 @@ class Media
     }
 
     /**
+     *  Returns the attributes of a bound media file.
+     * @param  string  $type
+     * @param  string  $file_name
+     */
+    public function mediaInfo(string $type, string $src)
+    {
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
+        $file_path = $prefix . $this->getMedia($type, $src, true);
+
+        $mime = str(Storage::exists($file_path) ? Storage::mimeType($file_path) : 'unknown/unknown');
+        $isImage = $mime->contains('image');
+        $mediaType = $mime->beforeLast('/')->exactly('application')
+            ? $mime->afterLast('/')
+            : $mime->beforeLast('/')->toString();
+
+        $file_url = $this->getMedia($type, $src) ?: (new Media())->getDefaultMedia($type);
+        $dynamicLink = route('fileable.open.file', Initiator::base64urlEncode($file_path));
+        $secureLink = route('fileable.secure.file', Initiator::base64urlEncode($file_path));
+
+        return [
+            'isImage' => $isImage,
+            'path' => $file_path,
+            'url' => $file_url,
+            'type' => $mediaType,
+            'mime' => $mime->toString(),
+            'size' => $mime->isNotEmpty() && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+            'dynamicLink' => $dynamicLink,
+            'secureLink' => $secureLink,
+        ];
+    }
+
+    /**
      * Delete a file from the storage
+     * @param  string  $type
+     * @param  ?string  $file_name
      */
     public function delete(string $type, string $src = null): ?string
     {
