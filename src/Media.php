@@ -426,12 +426,13 @@ class Media
         $secureLink = route('fileable.secure.file', Initiator::base64urlEncode($file_path));
 
         return [
-            'isImage' => $isImage,
-            'path' => $file_path,
             'url' => $file_url,
+            'ext' => str($src)->afterLast('.'),
             'type' => $mediaType,
             'mime' => $mime->toString(),
             'size' => $mime->isNotEmpty() && Storage::exists($file_path) ? Storage::size($file_path) : 0,
+            'path' => $file_path,
+            'isImage' => $isImage,
             'dynamicLink' => $dynamicLink,
             'secureLink' => $secureLink,
         ];
