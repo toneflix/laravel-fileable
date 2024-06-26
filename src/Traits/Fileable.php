@@ -87,8 +87,8 @@ trait Fileable
 
         static::saved(function (Fileable|Model $model) {
             if (is_array($model->file_field)) {
-                foreach ($model->file_field as $file => $collection) {
-                    $model->saveImage($file, $collection);
+                foreach ($model->file_field as $field => $collection) {
+                    $model->saveImage($field, $collection);
                 }
             } else {
                 $model->saveImage($model->file_field, $model->collection);
@@ -97,8 +97,8 @@ trait Fileable
 
         static::deleting(function (Fileable|Model $model) {
             if (is_array($model->file_field)) {
-                foreach ($model->file_field as $file => $collection) {
-                    $model->removeFile($file, $collection);
+                foreach ($model->file_field as $field => $collection) {
+                    $model->removeFile($field, $collection);
                 }
             } else {
                 $model->removeFile($model->file_field, $model->collection);
@@ -127,8 +127,8 @@ trait Fileable
             get: function () {
                 if (is_array($this->file_field)) {
                     $files = [];
-                    foreach ($this->file_field as $file => $collection) {
-                        $files[$file] = $this->retrieveFile($file, $collection);
+                    foreach ($this->file_field as $field => $collection) {
+                        $files[$field] = $this->retrieveFile($field, $collection);
                     }
 
                     return $files;
@@ -146,7 +146,6 @@ trait Fileable
     {
         return new Attribute(
             get: function () {
-                $file = null;
                 // If the file name is an array, get the first file
                 if (is_array($this->file_field)) {
                     foreach ($this->file_field as $field => $collection) {
@@ -171,11 +170,10 @@ trait Fileable
     {
         return new Attribute(
             get: function () {
-                $file = null;
                 // If the file name is an array, get the first file
                 if (is_array($this->file_field)) {
-                    foreach ($this->file_field as $file => $collection) {
-                        $file_field = $file;
+                    foreach ($this->file_field as $field => $collection) {
+                        $file_field = $field;
                         $collection = $collection;
                         break;
                     }
@@ -210,18 +208,18 @@ trait Fileable
             get: function () {
                 if (is_array($this->file_field)) {
                     $images = [];
-                    foreach ($this->file_field as $file => $collection) {
-                        $images[$file] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($file, $collection) {
+                    foreach ($this->file_field as $field => $collection) {
+                        $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
                             $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
 
-                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($file, $collection, true)))
+                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
 
                             if (!$isImage) {
                                 return [$key => $this->default_image];
                             }
 
-                            $asset = pathinfo($this->retrieveFile($file, $collection), PATHINFO_BASENAME);
+                            $asset = pathinfo($this->retrieveFile($field, $collection), PATHINFO_BASENAME);
 
                             return [$key => route('imagecache', [$size, $asset])];
                         });
@@ -256,8 +254,8 @@ trait Fileable
             get: function () {
                 if (is_array($this->file_field)) {
                     $files = [];
-                    foreach ($this->file_field as $file => $collection) {
-                        $files[$file] = (new Media())->mediaInfo($collection, $this->{$this->getFieldName($file)});
+                    foreach ($this->file_field as $field => $collection) {
+                        $files[$field] = (new Media())->mediaInfo($collection, $this->{$this->getFieldName($field)});
                     }
 
                     return $files;
@@ -309,7 +307,7 @@ trait Fileable
         string|array $db_field = null,
     ) {
         if (is_array($file_field)) {
-            foreach ($file_field as $file => $collection) {
+            foreach ($file_field as $field => $collection) {
                 if (is_array($collection)) {
                     throw new \ErrorException('Your collection should be a string');
                 }
@@ -350,16 +348,16 @@ trait Fileable
 
         $file_field = $file_field ?? $this->file_field;
         if (is_array($file_field)) {
-            foreach ($file_field as $file => $collection) {
-                if ($this->checkBase64($request->get($file))) {
+            foreach ($file_field as $field => $collection) {
+                if ($this->checkBase64($request->get($field))) {
                     $save_name = (new Media($this->disk))
-                        ->saveEncoded($collection, $request->get($file), $this->{$this->getFieldName($file)});
+                        ->saveEncoded($collection, $request->get($field), $this->{$this->getFieldName($field)});
                 } else {
                     $save_name = (new Media($this->disk))
-                        ->save($collection, $file, $this->{$this->getFieldName($file)});
+                        ->save($collection, $field, $this->{$this->getFieldName($field)});
                 }
                 // This maps to $this->image = $save_name where image is an existing database field
-                $this->{$this->getFieldName($file)} = $save_name;
+                $this->{$this->getFieldName($field)} = $save_name;
                 $this->saveQuietly();
             }
         } else {
@@ -408,9 +406,9 @@ trait Fileable
         $file_field = $file_field ?? $this->file_field;
 
         if (is_array($file_field)) {
-            foreach ($file_field as $file => $collection) {
+            foreach ($file_field as $field => $collection) {
                 return (new Media($this->disk))
-                    ->delete($collection, $this->{$this->getFieldName($file)});
+                    ->delete($collection, $this->{$this->getFieldName($field)});
             }
         } else {
             return (new Media($this->disk))
