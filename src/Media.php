@@ -401,10 +401,17 @@ class Media
     /**
      *  Returns the attributes of a bound media file.
      * @param  string  $type
-     * @param  string  $file_name
+     * @param  ?string  $file_name
      */
-    public function mediaInfo(string $type, string $src)
+    public function mediaInfo(string $type, ?string $src = null)
     {
+        if (!$src) {
+            return [
+                'isImage' => '', 'path' => '', 'url' => '', 'type' => '',
+                'mime' => '', 'size' => 0, 'dynamicLink' => '', 'secureLink' => '',
+            ];
+        }
+
         $prefix = !str($type)->contains('private.') ? 'public/' : '/';
         $file_path = $prefix . $this->getMedia($type, $src, true);
 
