@@ -427,7 +427,7 @@ class Media
 
         return [
             'url' => $file_url,
-            'ext' => str($src)->afterLast('.'),
+            'ext' => str($src)->afterLast('.')->toString(),
             'type' => $mediaType,
             'mime' => $mime->toString(),
             'size' => $mime->isNotEmpty() && Storage::exists($file_path) ? Storage::size($file_path) : 0,
