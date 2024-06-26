@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
-use ToneflixCode\LaravelFileable\Initiator;
 use ToneflixCode\LaravelFileable\Media;
 
 /**
@@ -35,7 +34,7 @@ trait Fileable
 
     /**
      * The field in the DB where the file reference should be saved
-     * If this is an array, the field should be mapped to the $file_name property
+     * If this is an array, the field should be mapped to the $file_field property
      *
      * @example db_field $db_field = ['image' => 'avatar'];
      * In this case avatar is an existing DB field and image will be the filename from the request
@@ -48,9 +47,18 @@ trait Fileable
      * An array mapping of file name (file request param) and colletion name
      * Or a file name (file request param) string
      *
+     * @deprecated 2.0.3 Use $file_field instead.
      * @var string|array<string,string>
      */
     public string|array $file_name = 'file';
+
+    /**
+     * An array mapping of file name (file request param) and colletion name
+     * Or a file name (file request param) string
+     *
+     * @var string|array<string,string>
+     */
+    public string|array $file_field = 'file';
 
     /**
      * Apply default file if no file is found
@@ -117,15 +125,15 @@ trait Fileable
     {
         return new Attribute(
             get: function () {
-                if (is_array($this->file_name)) {
+                if (is_array($this->file_field)) {
                     $files = [];
-                    foreach ($this->file_name as $file => $collection) {
+                    foreach ($this->file_field as $file => $collection) {
                         $files[$file] = $this->retrieveFile($file, $collection);
                     }
 
                     return $files;
                 } else {
-                    return [$this->file_name => $this->retrieveFile($this->file_name, $this->collection)];
+                    return [$this->file_field => $this->retrieveFile($this->file_field, $this->collection)];
                 }
             },
         );
@@ -140,14 +148,14 @@ trait Fileable
             get: function () {
                 $file = null;
                 // If the file name is an array, get the first file
-                if (is_array($this->file_name)) {
-                    foreach ($this->file_name as $field => $collection) {
+                if (is_array($this->file_field)) {
+                    foreach ($this->file_field as $field => $collection) {
                         $file_field = $field;
                         $collection = $collection;
                         break;
                     }
                 } else {
-                    $file_field = $this->file_name;
+                    $file_field = $this->file_field;
                     $collection = $this->collection;
                 }
 
@@ -165,14 +173,14 @@ trait Fileable
             get: function () {
                 $file = null;
                 // If the file name is an array, get the first file
-                if (is_array($this->file_name)) {
-                    foreach ($this->file_name as $file => $collection) {
+                if (is_array($this->file_field)) {
+                    foreach ($this->file_field as $file => $collection) {
                         $file_field = $file;
                         $collection = $collection;
                         break;
                     }
                 } else {
-                    $file_field = $this->file_name;
+                    $file_field = $this->file_field;
                     $collection = $this->collection;
                 }
 
@@ -200,9 +208,9 @@ trait Fileable
     {
         return Attribute::make(
             get: function () {
-                if (is_array($this->file_name)) {
+                if (is_array($this->file_field)) {
                     $images = [];
-                    foreach ($this->file_name as $file => $collection) {
+                    foreach ($this->file_field as $file => $collection) {
                         $images[$file] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($file, $collection) {
                             $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
 
@@ -223,14 +231,14 @@ trait Fileable
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
                         $prefix = !str($this->collection)->contains('private.') ? 'public/' : '/';
-                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_name, $this->collection, true)))
+                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 
                         if (!$isImage) {
                             return [$key => $this->default_image];
                         }
 
-                        $asset = pathinfo($this->retrieveFile($this->file_name, $this->collection), PATHINFO_BASENAME);
+                        $asset = pathinfo($this->retrieveFile($this->file_field, $this->collection), PATHINFO_BASENAME);
 
                         return [$key = route('imagecache', [$size, $asset])];
                     });
@@ -246,18 +254,18 @@ trait Fileable
     {
         return new Attribute(
             get: function () {
-                if (is_array($this->file_name)) {
+                if (is_array($this->file_field)) {
                     $files = [];
-                    foreach ($this->file_name as $file => $collection) {
+                    foreach ($this->file_field as $file => $collection) {
                         $files[$file] = (new Media())->mediaInfo($collection, $this->{$this->getFieldName($file)});
                     }
 
                     return $files;
                 } else {
                     return [
-                        $this->file_name => (new Media())->mediaInfo(
+                        $this->file_field => (new Media())->mediaInfo(
                             $this->collection,
-                            $this->{$this->getFieldName($this->file_name)}
+                            $this->{$this->getFieldName($this->file_field)}
                         )
                     ];
                 }
@@ -326,6 +334,7 @@ trait Fileable
         $this->applyDefault = $applyDefault;
         $this->legacyMode = $legacyMode;
         $this->collection = $collection;
+        $this->file_field = $file_field;
         $this->file_name = $file_field;
         $this->db_field = $db_field ?? $this->db_field;
     }
@@ -339,7 +348,7 @@ trait Fileable
     {
         $request = request();
 
-        $file_field = $file_field ?? $this->file_name;
+        $file_field = $file_field ?? $this->file_field;
         if (is_array($file_field)) {
             foreach ($file_field as $file => $collection) {
                 if ($this->checkBase64($request->get($file))) {
@@ -396,7 +405,7 @@ trait Fileable
      */
     public function removeFile(string|array $file_field = null, string $collection = 'default')
     {
-        $file_field = $file_field ?? $this->file_name;
+        $file_field = $file_field ?? $this->file_field;
 
         if (is_array($file_field)) {
             foreach ($file_field as $file => $collection) {
