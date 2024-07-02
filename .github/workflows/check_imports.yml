@@ -2,9 +2,9 @@ name: Check Imports
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main', 'dev']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main', 'dev']
 
 permissions:
   contents: read
@@ -13,8 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-    - name: Check Imports
-      run: ./vendor/bin/check_imports
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+      - name: Check Imports
+        run: ./vendor/bin/check_imports
