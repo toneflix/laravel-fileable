@@ -106,7 +106,7 @@ class Media
             $secure = Arr::get($this->namespaces, $type . '.secure', false) === true ? 'secure' : 'open';
 
             return Initiator::asset(route("fileable.{$secure}.file", [
-                'file' => base64url_encode($getPath . $src),
+                'file' => Initiator::base64urlEncode($getPath . $src),
             ]), true);
         }
 

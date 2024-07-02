@@ -11,7 +11,7 @@ class Initiator
     /**
      * Load full paths to all collections
      *
-     * @return Collection<TKey, TValue>
+     * @return Collection<TKey, string|array|int|Collection>
      */
     public static function collectionPaths(): array|Collection
     {
