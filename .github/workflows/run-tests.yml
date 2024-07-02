@@ -1,4 +1,4 @@
-name: Run Composer Tests
+name: Running Composer Tests
 
 on:
   push:
