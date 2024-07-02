@@ -7,7 +7,7 @@ use ToneflixCode\LaravelFileable\Media;
 
 /**
  * @see \ToneflixCode\LaravelFileable\Media
- * 
+ *
  * @method ?string getMedia(string $type, string $src = null, $returnPath = false, $legacyMode = false) Fetch an file from the storage
  * @method bool exists(string $type, string $src = null) Check if the file exists
  * @method ?string getPath(string $type, string $src = null) Get the relative path of the file
