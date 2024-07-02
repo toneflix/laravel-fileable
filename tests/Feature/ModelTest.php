@@ -19,7 +19,7 @@ test('can automatically upload file', function () {
 
     $response = $this->actingAs($user)
         ->post('account', [
-            'image' => UploadedFile::fake()->image('avatar.jpg')
+            'image' => UploadedFile::fake()->image('avatar.jpg'),
         ]);
 
     expect($response->original->get_files['image']['size'])->toBeGreaterThan(0);
@@ -37,10 +37,10 @@ test('can save file', function () {
 
     $response = $this->actingAs($user)
         ->post('account', [
-            'image' => UploadedFile::fake()->image('avatar.jpg')
+            'image' => UploadedFile::fake()->image('avatar.jpg'),
         ]);
 
-    $file = Storage::disk('default')->path('public/' . (new Media('default'))->getPath('avatar', $response->original));
+    $file = Storage::disk('default')->path('public/'.(new Media('default'))->getPath('avatar', $response->original));
 
     expect(file_exists($file))->toBeTrue();
 });
@@ -52,16 +52,17 @@ test('can delete file', function () {
     Route::post('account', function (Request $request) {
         $u = $request->user();
         $image = (new Media('default'))->save('avatar', 'image', $u->image);
+
         return $image;
     });
 
     $response = $this->actingAs($user)
         ->post('account', [
-            'image' => UploadedFile::fake()->image('avatar.jpg')
+            'image' => UploadedFile::fake()->image('avatar.jpg'),
         ]);
 
     (new Media('default'))->delete('avatar', $response->original);
-    $file = Storage::disk('default')->path('public/' . (new Media('default'))->getPath('avatar', $response->original));
+    $file = Storage::disk('default')->path('public/'.(new Media('default'))->getPath('avatar', $response->original));
 
     expect(file_exists($file))->toBeFalse();
 });
