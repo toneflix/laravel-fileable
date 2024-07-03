@@ -48,6 +48,7 @@ trait Fileable
      * Or a file name (file request param) string
      *
      * @deprecated 2.0.3 Use $file_field instead.
+     *
      * @var string|array<string,string>
      */
     public string|array $file_name = 'file';
@@ -183,7 +184,7 @@ trait Fileable
                 }
 
                 return [
-                    $file_field => (new Media())->mediaInfo($collection, $this->{$this->getFieldName($file_field)})
+                    $file_field => (new Media())->mediaInfo($collection, $this->{$this->getFieldName($file_field)}),
                 ];
             },
         );
@@ -210,12 +211,12 @@ trait Fileable
                     $images = [];
                     foreach ($this->file_field as $field => $collection) {
                         $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
-                            $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
+                            $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
 
-                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($field, $collection, true)))
+                            $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
 
-                            if (!$isImage) {
+                            if (! $isImage) {
                                 return [$key => $this->default_image];
                             }
 
@@ -228,11 +229,11 @@ trait Fileable
                     return $images;
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
-                        $prefix = !str($this->collection)->contains('private.') ? 'public/' : '/';
-                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_field, $this->collection, true)))
+                        $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
+                        $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 
-                        if (!$isImage) {
+                        if (! $isImage) {
                             return [$key => $this->default_image];
                         }
 
@@ -264,7 +265,7 @@ trait Fileable
                         $this->file_field => (new Media())->mediaInfo(
                             $this->collection,
                             $this->{$this->getFieldName($this->file_field)}
-                        )
+                        ),
                     ];
                 }
             },
@@ -277,9 +278,7 @@ trait Fileable
      *
      * @return void
      */
-    public static function registerEvents()
-    {
-    }
+    public static function registerEvents() {}
 
     /**
      * Register all required dependencies here
@@ -292,10 +291,10 @@ trait Fileable
     /**
      * All fileable properties should be registered
      *
-     * @param  string|array<string,string>  $file_field   filename | [filename => collection]
+     * @param  string|array<string,string>  $file_field  filename | [filename => collection]
      * @param  string  $collection  The name of the collection where files for the model should be stored in
      * @param  string  $applyDefault  If set to false missing files will not be replaced with the default URL
-     * @param  bool  $legacyMode Support media files that were saved before the introduction of the fileable trait
+     * @param  bool  $legacyMode  Support media files that were saved before the introduction of the fileable trait
      * @param  string|array|null  $db_field  The field in the DB where the file reference should be saved
      * @return void
      */
@@ -304,7 +303,7 @@ trait Fileable
         string $collection = 'default',
         bool $applyDefault = false,
         bool $legacyMode = false,
-        string|array $db_field = null,
+        string|array|null $db_field = null,
     ) {
         if (is_array($file_field)) {
             foreach ($file_field as $field => $collection) {
@@ -314,7 +313,7 @@ trait Fileable
 
                 $collect = Arr::get((new Media($this->disk))->namespaces, $collection);
 
-                if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
+                if (! in_array($collection, array_keys((new Media($this->disk))->namespaces)) && ! $collect) {
                     throw new \ErrorException("$collection is not a valid collection");
                 }
             }
@@ -326,7 +325,7 @@ trait Fileable
 
         $collect = Arr::get((new Media($this->disk))->namespaces, $collection);
 
-        if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
+        if (! in_array($collection, array_keys((new Media($this->disk))->namespaces)) && ! $collect) {
             throw new \ErrorException("$collection is not a valid collection");
         }
         $this->applyDefault = $applyDefault;
@@ -339,10 +338,8 @@ trait Fileable
 
     /**
      * Add an image to the storage media collection
-     *
-     * @param  string|array  $file_field
      */
-    public function saveImage(string|array $file_field = null, string $collection = 'default')
+    public function saveImage(string|array|null $file_field = null, string $collection = 'default')
     {
         $request = request();
 
@@ -401,7 +398,7 @@ trait Fileable
     /**
      * Delete an image from the storage media collection
      */
-    public function removeFile(string|array $file_field = null, string $collection = 'default')
+    public function removeFile(string|array|null $file_field = null, string $collection = 'default')
     {
         $file_field = $file_field ?? $this->file_field;
 
@@ -418,7 +415,7 @@ trait Fileable
 
     protected function getFieldName(string $file_field): string
     {
-        if (!$this->db_field) {
+        if (! $this->db_field) {
             return $file_field;
         }
 
