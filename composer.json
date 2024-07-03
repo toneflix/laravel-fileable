@@ -44,7 +44,7 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/pest",
+        "test": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
         "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
     },
     "config": {
