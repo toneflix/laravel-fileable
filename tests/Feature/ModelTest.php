@@ -22,7 +22,7 @@ test('can automatically upload file', function () {
             'image' => UploadedFile::fake()->image('avatar.jpg'),
         ]);
 
-    $file = Storage::path('public/' . (new Media())->getPath('avatar', $response->original->avatar));
+    $file = Storage::path('public/'.(new Media())->getPath('avatar', $response->original->avatar));
     expect(file_exists($file))->toBeTrue();
 });
 
@@ -41,7 +41,7 @@ test('can save file', function () {
             'image' => UploadedFile::fake()->image('avatar.jpg'),
         ]);
 
-    $file = Storage::disk('default')->path('public/' . (new Media('default'))->getPath('avatar', $response->original));
+    $file = Storage::disk('default')->path('public/'.(new Media('default'))->getPath('avatar', $response->original));
 
     expect(file_exists($file))->toBeTrue();
 });
@@ -63,7 +63,7 @@ test('can delete file', function () {
         ]);
 
     (new Media('default'))->delete('avatar', $response->original);
-    $file = Storage::disk('default')->path('public/' . (new Media('default'))->getPath('avatar', $response->original));
+    $file = Storage::disk('default')->path('public/'.(new Media('default'))->getPath('avatar', $response->original));
 
     expect(file_exists($file))->toBeFalse();
 });
