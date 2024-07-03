@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase as Orchestra;
 use ToneflixCode\LaravelFileable\FileableServiceProvider;
 use ToneflixCode\LaravelFileable\Tests\Database\Factories\UserFactory;
+use Illuminate\Contracts\Config\Repository;
 
 abstract class TestCase extends Orchestra
 {
@@ -16,14 +17,11 @@ abstract class TestCase extends Orchestra
         UserFactory::class,
     ];
 
-    public function getEnvironmentSetUp($app)
+    protected function defineEnvironment($app)
     {
-        loadEnv();
-
-        config()->set('app.faker_locale', 'en_NG');
-
-        $migration = include __DIR__.'/database/migrations/create_users_tables.php';
-        $migration->up();
+        tap($app['config'], function (Repository $config) {
+            $config->set('app.faker_locale', 'en_NG');
+        });
     }
 
     protected function setUp(): void
@@ -31,11 +29,16 @@ abstract class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'ToneflixCode\\LaravelFileable\\Tests\\Database\\Factories\\'.
+            fn (string $modelName) => 'ToneflixCode\\LaravelFileable\\Tests\\Database\\Factories\\' .
                 class_basename(
                     $modelName
-                ).'Factory'
+                ) . 'Factory'
         );
+    }
+
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
     }
 
     protected function getPackageProviders($app)
