@@ -84,8 +84,6 @@ trait Fileable
     {
         parent::boot();
 
-        static::registerEvents();
-
         static::saved(function (Fileable|Model $model) {
             if (is_array($model->file_field)) {
                 foreach ($model->file_field as $field => $collection) {
@@ -105,6 +103,8 @@ trait Fileable
                 $model->removeFile($model->file_field, $model->collection);
             }
         });
+
+        static::registerEvents();
     }
 
     /**
@@ -211,12 +211,12 @@ trait Fileable
                     $images = [];
                     foreach ($this->file_field as $field => $collection) {
                         $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
-                            $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
+                            $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
 
-                            $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($field, $collection, true)))
+                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
 
-                            if (! $isImage) {
+                            if (!$isImage) {
                                 return [$key => $this->default_image];
                             }
 
@@ -229,11 +229,11 @@ trait Fileable
                     return $images;
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
-                        $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
-                        $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
+                        $prefix = !str($this->collection)->contains('private.') ? 'public/' : '/';
+                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 
-                        if (! $isImage) {
+                        if (!$isImage) {
                             return [$key => $this->default_image];
                         }
 
@@ -278,7 +278,9 @@ trait Fileable
      *
      * @return void
      */
-    public static function registerEvents() {}
+    public static function registerEvents()
+    {
+    }
 
     /**
      * Register all required dependencies here
@@ -313,7 +315,7 @@ trait Fileable
 
                 $collect = Arr::get((new Media($this->disk))->namespaces, $collection);
 
-                if (! in_array($collection, array_keys((new Media($this->disk))->namespaces)) && ! $collect) {
+                if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
                     throw new \ErrorException("$collection is not a valid collection");
                 }
             }
@@ -325,7 +327,7 @@ trait Fileable
 
         $collect = Arr::get((new Media($this->disk))->namespaces, $collection);
 
-        if (! in_array($collection, array_keys((new Media($this->disk))->namespaces)) && ! $collect) {
+        if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
             throw new \ErrorException("$collection is not a valid collection");
         }
         $this->applyDefault = $applyDefault;
@@ -415,7 +417,7 @@ trait Fileable
 
     protected function getFieldName(string $file_field): string
     {
-        if (! $this->db_field) {
+        if (!$this->db_field) {
             return $file_field;
         }
 
