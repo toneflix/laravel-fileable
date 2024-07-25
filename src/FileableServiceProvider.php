@@ -39,7 +39,7 @@ class FileableServiceProvider extends ServiceProvider
 
         // Register the main class to use with the facade
         $this->app->singleton('laravel-fileable', function () {
-            return new Media();
+            return new Media;
         });
     }
 }

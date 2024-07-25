@@ -22,7 +22,7 @@ test('can automatically upload file', function () {
             'image' => UploadedFile::fake()->image('avatar.jpg'),
         ]);
 
-    $file = Storage::path('public/'.(new Media())->getPath('avatar', $response->original->avatar));
+    $file = Storage::path('public/'.(new Media)->getPath('avatar', $response->original->avatar));
     expect(file_exists($file))->toBeTrue();
 });
 

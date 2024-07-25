@@ -84,8 +84,6 @@ trait Fileable
     {
         parent::boot();
 
-        static::registerEvents();
-
         static::saved(function (Fileable|Model $model) {
             if (is_array($model->file_field)) {
                 foreach ($model->file_field as $field => $collection) {
@@ -105,6 +103,8 @@ trait Fileable
                 $model->removeFile($model->file_field, $model->collection);
             }
         });
+
+        static::registerEvents();
     }
 
     /**
@@ -159,7 +159,7 @@ trait Fileable
                     $collection = $this->collection;
                 }
 
-                return $this->retrieveFile($file_field, $collection) ?? (new Media())->getDefaultMedia($collection);
+                return $this->retrieveFile($file_field, $collection) ?? (new Media)->getDefaultMedia($collection);
             },
         );
     }
@@ -184,7 +184,7 @@ trait Fileable
                 }
 
                 return [
-                    $file_field => (new Media())->mediaInfo($collection, $this->{$this->getFieldName($file_field)}),
+                    $file_field => (new Media)->mediaInfo($collection, $this->{$this->getFieldName($file_field)}),
                 ];
             },
         );
@@ -256,13 +256,13 @@ trait Fileable
                 if (is_array($this->file_field)) {
                     $files = [];
                     foreach ($this->file_field as $field => $collection) {
-                        $files[$field] = (new Media())->mediaInfo($collection, $this->{$this->getFieldName($field)});
+                        $files[$field] = (new Media)->mediaInfo($collection, $this->{$this->getFieldName($field)});
                     }
 
                     return $files;
                 } else {
                     return [
-                        $this->file_field => (new Media())->mediaInfo(
+                        $this->file_field => (new Media)->mediaInfo(
                             $this->collection,
                             $this->{$this->getFieldName($this->file_field)}
                         ),
