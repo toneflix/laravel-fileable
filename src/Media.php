@@ -187,31 +187,33 @@ class Media
     /**
      * Save a file to the storage
      *
-     * @param  ?string  $file_name
-     * @param  ?string  $old
+     * @param  string  $type  The name of the collection where this file should be saved
+     * @param  ?string  $file_name  The request filename property
+     * @param  ?string  $old  The name of the old existing file to be deleted
+     * @param  string|int|null  $index  Current index of the file if saving in a loop
      */
-    public function save(string $type, ?string $file_name = null, ?string $old = null, string|int|null $index = null): ?string
-    {
+    public function save(
+        string $type,
+        ?string $file_name = null,
+        ?string $old = null,
+        string|int|null $index = null
+    ): ?string {
         // Get the file path
         $getPath = Arr::get($this->namespaces, $type.'.path');
 
         // Get the file path prefix
         $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
 
-<<<<<<< HEAD
         $request = request(null);
-        $old_path = $prefix . $getPath . $old;
-=======
-        $request = request();
         $old_path = $prefix.$getPath.$old;
->>>>>>> c62b3c0a1678a7c043edd1ae3bec49d02cd0d6d0
 
         // Adds support for saving files from an array index using wildcard request access
         $fn = str($file_name);
         $fileKey = $fn->replace('.*.', ".$index.")->toString();
         $fileList = $fn->contains('.*.') ? Arr::dot($request->allFiles()) : null;
 
-        if ($request->hasFile($file_name) && (! is_null($index) || isset($fileList[$fileKey]))) {
+        if ($request->hasFile($file_name) || isset($fileList[$fileKey])) {
+
             if ($old && $this->disk->exists($old_path) && $old !== 'default.png') {
                 $this->disk->delete($old_path);
             }

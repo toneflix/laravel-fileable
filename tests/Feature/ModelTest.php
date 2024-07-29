@@ -46,6 +46,34 @@ test('can save file', function () {
     expect(file_exists($file))->toBeTrue();
 });
 
+test('can save files in a loop', function () {
+    $user = User::factory()->create();
+    Storage::fake('default');
+
+    Route::post('account', function (Request $request) {
+        $files = [];
+        foreach ($request->file('assets') as $i => $file) {
+            $files[] = ((new Media('default'))->save('avatar', 'assets', null, $i));
+        }
+
+        return $files;
+    });
+
+    $response = $this->actingAs($user)
+        ->post('account', [
+            'assets' => [
+                UploadedFile::fake()->image('avatar.jpg'),
+                UploadedFile::fake()->image('avatar2.jpg'),
+            ],
+        ]);
+
+    foreach ($response->original as $file) {
+        $file = Storage::disk('default')->path('public/'.(new Media('default'))->getPath('avatar', $file));
+
+        expect(file_exists($file))->toBeTrue();
+    }
+});
+
 test('can delete file', function () {
     $user = User::factory()->create();
     Storage::fake('default');
