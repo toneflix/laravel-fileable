@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.0.6 - 2024-07-29
+
+### What's Changed
+
+* Dev by @3m1n3nc3 in https://github.com/toneflix/laravel-fileable/pull/10
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.0.5...2.0.6
+
 ## 2.0.5 - 2024-07-25
 
 ### What's Changed
