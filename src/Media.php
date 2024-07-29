@@ -75,7 +75,7 @@ class Media
                 return parse_url($src, PHP_URL_PATH);
             }
 
-            return Initiator::asset($url->replace('localhost', request()->getHttpHost()), true);
+            return Initiator::asset($url->replace('localhost', request(null)->getHttpHost()), true);
         }
 
         if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
@@ -198,8 +198,13 @@ class Media
         // Get the file path prefix
         $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
 
+<<<<<<< HEAD
+        $request = request(null);
+        $old_path = $prefix . $getPath . $old;
+=======
         $request = request();
         $old_path = $prefix.$getPath.$old;
+>>>>>>> c62b3c0a1678a7c043edd1ae3bec49d02cd0d6d0
 
         // Adds support for saving files from an array index using wildcard request access
         $fn = str($file_name);
