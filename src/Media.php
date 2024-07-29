@@ -57,19 +57,19 @@ class Media
             $src = str($src)->afterLast('/')->__toString();
         }
 
-        if (str($src)->contains(':') && ! str($src)->contains('http')) {
+        if (str($src)->contains(':') && !str($src)->contains('http')) {
             $type = str($src)->before(':')->__toString();
             $src = str($src)->after(':')->__toString();
         }
 
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $default = Arr::get($this->namespaces, $type.'.default');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
 
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             $port = parse_url($src, PHP_URL_PORT);
-            $url = str($src)->replace('localhost:'.$port, 'localhost');
+            $url = str($src)->replace('localhost:' . $port, 'localhost');
 
             if ($returnPath === true) {
                 return parse_url($src, PHP_URL_PATH);
@@ -78,14 +78,14 @@ class Media
             return Initiator::asset($url->replace('localhost', request()->getHttpHost()), true);
         }
 
-        if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
+        if (!$src || !$this->disk->exists($prefix . $getPath . $src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
                 if ($returnPath === true) {
                     return parse_url($default, PHP_URL_PATH);
                 }
 
                 return $default;
-            } elseif (! $this->disk->exists($prefix.$getPath.$default)) {
+            } elseif (!$this->disk->exists($prefix . $getPath . $default)) {
                 if ($returnPath === true) {
                     return $this->default_media;
                 }
@@ -94,23 +94,23 @@ class Media
             }
 
             if ($returnPath === true) {
-                return Initiator::asset($getPath.$default, true);
+                return Initiator::asset($getPath . $default, true);
             }
 
-            return Initiator::asset($getPath.$default);
+            return Initiator::asset($getPath . $default);
         }
 
         if ($returnPath === true) {
-            return Initiator::asset($getPath.$src, true);
+            return Initiator::asset($getPath . $src, true);
         } elseif (str($type)->contains('private.')) {
-            $secure = Arr::get($this->namespaces, $type.'.secure', false) === true ? 'secure' : 'open';
+            $secure = Arr::get($this->namespaces, $type . '.secure', false) === true ? 'secure' : 'open';
 
             return Initiator::asset(route("fileable.{$secure}.file", [
-                'file' => Initiator::base64urlEncode($getPath.$src),
+                'file' => Initiator::base64urlEncode($getPath . $src),
             ]), true);
         }
 
-        return Initiator::asset($getPath.$src);
+        return Initiator::asset($getPath . $src);
     }
 
     /**
@@ -118,10 +118,10 @@ class Media
      */
     public function exists(string $type, ?string $src = null): bool
     {
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
-        if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
+        if (!$src || !$this->disk->exists($prefix . $getPath . $src)) {
             return false;
         }
 
@@ -133,37 +133,37 @@ class Media
      */
     public function getPath(string $type, ?string $src = null): ?string
     {
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $default = Arr::get($this->namespaces, $type.'.default');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             return parse_url($src, PHP_URL_PATH);
         }
 
-        if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
+        if (!$src || !$this->disk->exists($prefix . $getPath . $src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
                 return parse_url($default, PHP_URL_PATH);
-            } elseif (! $this->disk->exists($prefix.$getPath.$default)) {
+            } elseif (!$this->disk->exists($prefix . $getPath . $default)) {
                 return $this->default_media;
             }
 
-            return $getPath.$default;
+            return $getPath . $default;
         }
 
-        return $getPath.$src;
+        return $getPath . $src;
     }
 
     public function getDefaultMedia(string $type): string
     {
-        $default = Arr::get($this->namespaces, $type.'.default');
-        $path = Arr::get($this->namespaces, $type.'.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
+        $path = Arr::get($this->namespaces, $type . '.path');
 
         if (filter_var($default, FILTER_VALIDATE_URL)) {
             return $default;
         }
 
-        return Initiator::asset($path.$default);
+        return Initiator::asset($path . $default);
     }
 
     /**
@@ -189,25 +189,25 @@ class Media
      *
      * @param  ?string  $file_name
      * @param  ?string  $old
-     * @param  ?string  $index
+     * @param  string|int|null  $index
      */
-    public function save(string $type, ?string $file_name = null, ?string $old = null, ?string $index = null): ?string
+    public function save(string $type, ?string $file_name = null, ?string $old = null, string|int $index = null): ?string
     {
         // Get the file path
-        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
 
         // Get the file path prefix
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
         $request = request();
-        $old_path = $prefix.$getPath.$old;
+        $old_path = $prefix . $getPath . $old;
 
         // Adds support for saving files from an array index using wildcard request access
         $fn = str($file_name);
         $fileKey = $fn->replace('.*.', ".$index.")->toString();
         $fileList = $fn->contains('.*.') ? Arr::dot($request->allFiles()) : null;
 
-        if ($request->hasFile($file_name) && (! $index || isset($fileList[$fileKey]))) {
+        if ($request->hasFile($file_name) && (!is_null($index) || isset($fileList[$fileKey]))) {
             if ($old && $this->disk->exists($old_path) && $old !== 'default.png') {
                 $this->disk->delete($old_path);
             }
@@ -216,17 +216,17 @@ class Media
             // This is useful when you have multiple files with the same name
             if (isset($fileList[$fileKey])) {
                 $requestFile = $fileList[$fileKey];
-            } elseif ($index !== null && isset($request->file($file_name)[$index])) {
+            } elseif (!is_null($index) && isset($request->file($file_name)[$index])) {
                 $requestFile = $request->file($file_name)[$index];
             } else {
                 $requestFile = $request->file($file_name);
             }
 
             // Give the file a new name and append extension
-            $rename = rand().'_'.rand().'.'.$requestFile->extension();
+            $rename = rand() . '_' . rand() . '.' . $requestFile->extension();
 
             $this->disk->putFileAs(
-                $prefix.$getPath, // Path
+                $prefix . $getPath, // Path
                 $requestFile, // Request File
                 $rename // Directory
             );
@@ -235,15 +235,15 @@ class Media
             $request->offsetUnset($file_name);
 
             // If the file is an image resize it
-            $size = Arr::get($this->namespaces, $type.'.size');
+            $size = Arr::get($this->namespaces, $type . '.size');
 
-            $mime = $this->disk->mimeType($prefix.$getPath.$rename);
+            $mime = $this->disk->mimeType($prefix . $getPath . $rename);
 
-            $size = Arr::get($this->namespaces, $type.'.size');
+            $size = Arr::get($this->namespaces, $type . '.size');
 
             // If the file is an image resize it if size is available
             if ($size && str($mime)->contains('image')) {
-                $this->imageDriver->read($this->disk->path($prefix.$getPath.$rename))
+                $this->imageDriver->read($this->disk->path($prefix . $getPath . $rename))
                     ->cover(Arr::first($size), Arr::last($size))
                     ->save();
             }
@@ -271,17 +271,17 @@ class Media
      */
     public function saveEncoded(string $type, ?string $encoded_string = null, ?string $old = null, ?string $index = null): ?string
     {
-        if (! $encoded_string) {
+        if (!$encoded_string) {
             return null;
         }
 
         // Get the file path
-        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
 
         // Get the file path prefix
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
-        $old_path = $prefix.$getPath.$old;
+        $old_path = $prefix . $getPath . $old;
 
         // Delete the old file
         if ($old && $this->disk->exists($old_path) && $old !== 'default.png') {
@@ -310,8 +310,8 @@ class Media
         ])->get($ext, $ext);
 
         // Give the file a new name and append extension
-        $rename = rand().'_'.rand().'.'.$extension;
-        $path = $prefix.trim($getPath, '/').'/'.$rename;
+        $rename = rand() . '_' . rand() . '.' . $extension;
+        $path = $prefix . trim($getPath, '/') . '/' . $rename;
 
         // Store the file
         $this->disk->put($path, base64_decode($encoded_string));
@@ -340,7 +340,7 @@ class Media
                 $file = collect(File::allFiles($path))
                     ->firstWhere(fn ($e) => $e->getFilename() === $fileName && str(File::mimeType($e))->contains('image'));
 
-                if (! $file) {
+                if (!$file) {
                     continue;
                 }
             }
@@ -396,15 +396,15 @@ class Media
      */
     public function mediaInfo(string $type, ?string $src = null)
     {
-        if (! $src) {
+        if (!$src) {
             return [
                 'isImage' => '', 'path' => '', 'url' => '', 'type' => '',
                 'mime' => '', 'size' => 0, 'dynamicLink' => '', 'secureLink' => '',
             ];
         }
 
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
-        $file_path = $prefix.$this->getMedia($type, $src, true);
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
+        $file_path = $prefix . $this->getMedia($type, $src, true);
 
         $mime = str(Storage::exists($file_path) ? Storage::mimeType($file_path) : 'unknown/unknown');
         $isImage = $mime->contains('image');
@@ -436,10 +436,10 @@ class Media
      */
     public function delete(string $type, ?string $src = null): ?string
     {
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $prefix = !str($type)->contains('private.') ? 'public/' : '/';
 
-        $path = $prefix.$getPath.$src;
+        $path = $prefix . $getPath . $src;
 
         if ($src && $this->disk->exists($path) && $src !== 'default.png') {
             $this->disk->delete($path);
