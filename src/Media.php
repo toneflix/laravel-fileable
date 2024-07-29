@@ -28,7 +28,7 @@ class Media
 
         $this->globalDefault = true;
 
-        $this->imageDriver = new ImageManager(new Driver());
+        $this->imageDriver = new ImageManager(new Driver);
 
         $this->disk = Storage::disk($storageDisc ?? Storage::getDefaultDriver());
     }
@@ -412,7 +412,7 @@ class Media
             ? $mime->afterLast('/')
             : $mime->beforeLast('/')->toString();
 
-        $file_url = $this->getMedia($type, $src) ?: (new Media())->getDefaultMedia($type);
+        $file_url = $this->getMedia($type, $src) ?: (new Media)->getDefaultMedia($type);
         $dynamicLink = route('fileable.open.file', Initiator::base64urlEncode($file_path));
         $secureLink = route('fileable.secure.file', Initiator::base64urlEncode($file_path));
 

@@ -159,7 +159,7 @@ trait Fileable
                     $collection = $this->collection;
                 }
 
-                return $this->retrieveFile($file_field, $collection) ?? (new Media())->getDefaultMedia($collection);
+                return $this->retrieveFile($file_field, $collection) ?? (new Media)->getDefaultMedia($collection);
             },
         );
     }
@@ -184,7 +184,7 @@ trait Fileable
                 }
 
                 return [
-                    $file_field => (new Media())->mediaInfo($collection, $this->{$this->getFieldName($file_field)}),
+                    $file_field => (new Media)->mediaInfo($collection, $this->{$this->getFieldName($file_field)}),
                 ];
             },
         );
@@ -211,12 +211,12 @@ trait Fileable
                     $images = [];
                     foreach ($this->file_field as $field => $collection) {
                         $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
-                            $prefix = !str($collection)->contains('private.') ? 'public/' : '/';
+                            $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
 
-                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($field, $collection, true)))
+                            $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
 
-                            if (!$isImage) {
+                            if (! $isImage) {
                                 return [$key => $this->default_image];
                             }
 
@@ -229,11 +229,11 @@ trait Fileable
                     return $images;
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
-                        $prefix = !str($this->collection)->contains('private.') ? 'public/' : '/';
-                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_field, $this->collection, true)))
+                        $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
+                        $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 
-                        if (!$isImage) {
+                        if (! $isImage) {
                             return [$key => $this->default_image];
                         }
 
@@ -256,13 +256,13 @@ trait Fileable
                 if (is_array($this->file_field)) {
                     $files = [];
                     foreach ($this->file_field as $field => $collection) {
-                        $files[$field] = (new Media())->mediaInfo($collection, $this->{$this->getFieldName($field)});
+                        $files[$field] = (new Media)->mediaInfo($collection, $this->{$this->getFieldName($field)});
                     }
 
                     return $files;
                 } else {
                     return [
-                        $this->file_field => (new Media())->mediaInfo(
+                        $this->file_field => (new Media)->mediaInfo(
                             $this->collection,
                             $this->{$this->getFieldName($this->file_field)}
                         ),
@@ -278,9 +278,7 @@ trait Fileable
      *
      * @return void
      */
-    public static function registerEvents()
-    {
-    }
+    public static function registerEvents() {}
 
     /**
      * Register all required dependencies here
@@ -315,7 +313,7 @@ trait Fileable
 
                 $collect = Arr::get((new Media($this->disk))->namespaces, $collection);
 
-                if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
+                if (! in_array($collection, array_keys((new Media($this->disk))->namespaces)) && ! $collect) {
                     throw new \ErrorException("$collection is not a valid collection");
                 }
             }
@@ -327,7 +325,7 @@ trait Fileable
 
         $collect = Arr::get((new Media($this->disk))->namespaces, $collection);
 
-        if (!in_array($collection, array_keys((new Media($this->disk))->namespaces)) && !$collect) {
+        if (! in_array($collection, array_keys((new Media($this->disk))->namespaces)) && ! $collect) {
             throw new \ErrorException("$collection is not a valid collection");
         }
         $this->applyDefault = $applyDefault;
@@ -417,7 +415,7 @@ trait Fileable
 
     protected function getFieldName(string $file_field): string
     {
-        if (!$this->db_field) {
+        if (! $this->db_field) {
             return $file_field;
         }
 
