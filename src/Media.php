@@ -189,9 +189,8 @@ class Media
      *
      * @param  ?string  $file_name
      * @param  ?string  $old
-     * @param  ?string  $index
      */
-    public function save(string $type, ?string $file_name = null, ?string $old = null, ?string $index = null): ?string
+    public function save(string $type, ?string $file_name = null, ?string $old = null, string|int|null $index = null): ?string
     {
         // Get the file path
         $getPath = Arr::get($this->namespaces, $type.'.path');
@@ -207,7 +206,7 @@ class Media
         $fileKey = $fn->replace('.*.', ".$index.")->toString();
         $fileList = $fn->contains('.*.') ? Arr::dot($request->allFiles()) : null;
 
-        if ($request->hasFile($file_name) && (! $index || isset($fileList[$fileKey]))) {
+        if ($request->hasFile($file_name) && (! is_null($index) || isset($fileList[$fileKey]))) {
             if ($old && $this->disk->exists($old_path) && $old !== 'default.png') {
                 $this->disk->delete($old_path);
             }
@@ -216,7 +215,7 @@ class Media
             // This is useful when you have multiple files with the same name
             if (isset($fileList[$fileKey])) {
                 $requestFile = $fileList[$fileKey];
-            } elseif ($index !== null && isset($request->file($file_name)[$index])) {
+            } elseif (! is_null($index) && isset($request->file($file_name)[$index])) {
                 $requestFile = $request->file($file_name)[$index];
             } else {
                 $requestFile = $request->file($file_name);
