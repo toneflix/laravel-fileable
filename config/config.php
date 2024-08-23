@@ -5,6 +5,24 @@ return [
 
     /*
      |--------------------------------------------------------------------------
+     | Streamable Mimes
+     |--------------------------------------------------------------------------
+     |
+     | When accessing a remote url via any of the Dynamic Route endpoints
+     | the system will attempt to stream the file if it's mime matches
+     | any of the mimes in the config.
+     |
+     | E.g. ['video/mp4', 'audio/mp3']
+     |
+    */
+
+    'streamable_mimes' => [
+        'video/mp4',
+        'audio/mp3',
+    ],
+
+    /*
+     |--------------------------------------------------------------------------
      | Decode Remote Files
      |--------------------------------------------------------------------------
      |

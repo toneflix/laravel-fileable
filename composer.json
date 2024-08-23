@@ -1,68 +1,69 @@
 {
-    "name": "toneflix-code/laravel-fileable",
-    "description": "Laravel Fileable exposes methods that make handling file upload with Laravel filesystem even easier, it also exposes a trait that automatically handles file uploads for you.",
-    "keywords": [
-        "toneflix-code",
-        "laravel-fileable",
-        "version 2.x"
-    ],
-    "homepage": "https://github.com/toneflix/laravel-fileable",
-    "license": "MIT",
-    "type": "library",
-    "authors": [
-        {
-            "name": "Legacy",
-            "email": "legacy@toneflix.com.ng",
-            "homepage": "https://legacy.toneflix.com.ng",
-            "role": "Developer"
-        }
-    ],
-    "require": {
-        "php": "^8.1|^8.2|^8.3",
-        "illuminate/filesystem": "^9.0|^10.0|^11.0",
-        "illuminate/support": "^9.0|^10.0|^11.0",
-        "imanghafoori/php-imports-analyzer": "^1.0",
-        "intervention/image": "^3.5"
+  "name": "toneflix-code/laravel-fileable",
+  "description": "Laravel Fileable exposes methods that make handling file upload with Laravel filesystem even easier, it also exposes a trait that automatically handles file uploads for you.",
+  "keywords": [
+    "toneflix-code",
+    "laravel-fileable",
+    "version 2.x"
+  ],
+  "homepage": "https://github.com/toneflix/laravel-fileable",
+  "license": "MIT",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Legacy",
+      "email": "legacy@toneflix.com.ng",
+      "homepage": "https://legacy.toneflix.com.ng",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.1|^8.2|^8.3",
+    "illuminate/filesystem": "^9.0|^10.0|^11.0",
+    "illuminate/support": "^9.0|^10.0|^11.0",
+    "imanghafoori/php-imports-analyzer": "^1.0",
+    "intervention/image": "^3.5"
+  },
+  "require-dev": {
+    "fakerphp/faker": "^1.23",
+    "illuminate/contracts": "^9.0|^10.0|^11.0",
+    "illuminate/routing": "^9.0|^10.0|^11.0",
+    "laravel/pint": "^1.15",
+    "orchestra/testbench": "^8.8",
+    "pestphp/pest": "^2.34",
+    "pestphp/pest-plugin-laravel": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "ToneflixCode\\LaravelFileable\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ToneflixCode\\LaravelFileable\\Tests\\": "tests",
+      "ToneflixCode\\LaravelFileable\\Tests\\Database\\Factories\\": "tests/database/factories"
+    }
+  },
+  "scripts": {
+    "test": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
+    "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
     },
-    "require-dev": {
-        "pestphp/pest": "^2.34",
-        "laravel/pint": "^1.15",
-        "fakerphp/faker": "^1.23",
-        "illuminate/contracts": "^9.0|^10.0|^11.0",
-        "orchestra/testbench": "^8.8",
-        "pestphp/pest-plugin-laravel": "^2.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "ToneflixCode\\LaravelFileable\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "ToneflixCode\\LaravelFileable\\Tests\\": "tests",
-            "ToneflixCode\\LaravelFileable\\Tests\\Database\\Factories\\": "tests/database/factories"
-        }
-    },
-    "scripts": {
-        "test": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
-        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
-    },
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        },
-        "sort-packages": true
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "ToneflixCode\\LaravelFileable\\FileableServiceProvider"
-            ],
-            "aliases": {
-                "LaravelFileable": "ToneflixCode\\LaravelFileable\\Facades\\Fileable"
-            }
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    "sort-packages": true
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "ToneflixCode\\LaravelFileable\\FileableServiceProvider"
+      ],
+      "aliases": {
+        "LaravelFileable": "ToneflixCode\\LaravelFileable\\Facades\\Fileable"
+      }
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }

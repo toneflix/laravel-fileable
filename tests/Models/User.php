@@ -39,6 +39,7 @@ class User extends Authenticatable
     {
         $this->fileableLoader([
             'image' => 'avatar',
+            'video' => 'default',
         ], 'default', true, false, ['image' => 'avatar']);
     }
 }

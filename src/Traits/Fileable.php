@@ -115,7 +115,7 @@ trait Fileable
     public function images(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->files,
+            get: fn() => $this->files,
         );
     }
 
@@ -196,7 +196,7 @@ trait Fileable
     public function defaultImage(): Attribute
     {
         return Attribute::make(
-            get: fn () => ($this->collection
+            get: fn() => ($this->collection
                 ? (new Media($this->disk))->getDefaultMedia($this->collection)
                 : asset('media/default.jpg')
             )
@@ -213,7 +213,7 @@ trait Fileable
                         $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
                             $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
 
-                            $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($field, $collection, true)))
+                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
 
                             if (! $isImage) {
@@ -230,7 +230,7 @@ trait Fileable
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
                         $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
-                        $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
+                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 
                         if (! $isImage) {
