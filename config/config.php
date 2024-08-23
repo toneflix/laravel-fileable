@@ -2,6 +2,98 @@
 
 //
 return [
+
+    /*
+     |--------------------------------------------------------------------------
+     | Decode Remote Files
+     |--------------------------------------------------------------------------
+     |
+     | When accessing a remote url via any of the Dynamic Route endpoints
+     | the system will attempt to fetch and processs the file from the origin
+     | before serving it to the user if this is set to true, otherwise
+     | request will fail and return 404
+     |
+     | ** Not recommeded for production use.
+     |
+    */
+
+    // TODO: Implement this
+    'decode_remote_files' => true,
+    // Not yet implemented
+
+    /*
+    |--------------------------------------------------------------------------
+    | Private Dynamic Link Middleware
+    |--------------------------------------------------------------------------
+    |
+    | The middleware that will be applied when accessing the
+    | Private Dynamic Link Route
+    |
+    */
+
+    'file_route_secure_middleware' => 'web',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Responsive Route
+    |--------------------------------------------------------------------------
+    |
+    | The route definition to help users access the responsive images
+    |
+    */
+
+    'responsive_image_route' => 'images/responsive/{file}/{size}',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Private Dynamic Link Route
+    |--------------------------------------------------------------------------
+    |
+    | The route definition to help users access the private dynamic files
+    |
+    */
+
+    'file_route_secure' => 'secure/files/{file}',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Public Dynamic Link Route
+    |--------------------------------------------------------------------------
+    |
+    | The route definition to help users access the public dynamic files
+    |
+    */
+
+    'file_route_open' => 'open/files/{file}',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Symbolic Links
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure the symbolic links that will be created when the
+    | `storage:link` Artisan command is executed. The array keys should be
+    | the locations of the links and the values should be their targets.
+    |
+    */
+
+    'symlinks' => [
+        public_path('avatars') => storage_path('app/public/avatars'),
+        public_path('media') => storage_path('app/public/media'),
+    ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Collection Maps
+     |--------------------------------------------------------------------------
+     |
+     | This is how files stored on your server or storage driver are mapped
+     | to their specific URLs.
+     | The [path] property of every collcetion should match the symlinks
+     | defined above.
+     |
+    */
+
     'collections' => [
         'avatar' => [
             'size' => [400, 400],
@@ -38,6 +130,16 @@ return [
             ],
         ],
     ],
+
+    /*
+     |--------------------------------------------------------------------------
+     | Image Size Maps
+     |--------------------------------------------------------------------------
+     |
+     | This will be mapped to generate responsive variants of your images
+     |
+    */
+
     'image_sizes' => [
         'xs' => '431',
         'sm' => '431',
@@ -49,13 +151,5 @@ return [
         'md-square' => '694x694',
         'lg-square' => '720x720',
         'xl-square' => '1080x1080',
-    ],
-    'file_route_secure_middleware' => 'web',
-    'responsive_image_route' => 'images/responsive/{file}/{size}',
-    'file_route_secure' => 'secure/files/{file}',
-    'file_route_open' => 'open/files/{file}',
-    'symlinks' => [
-        public_path('avatars') => storage_path('app/public/avatars'),
-        public_path('media') => storage_path('app/public/media'),
     ],
 ];
