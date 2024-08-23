@@ -3,7 +3,6 @@
 namespace ToneflixCode\LaravelFileable\Controllers;
 
 use Illuminate\Routing\Controller;
-use Raju\Streamer\Helpers\VideoStream;
 use ToneflixCode\LaravelFileable\Facades\Media;
 
 class FileController extends Controller
