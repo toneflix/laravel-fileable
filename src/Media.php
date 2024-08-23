@@ -272,10 +272,6 @@ class Media
 
     /**
      * Save a base64 encoded image string to storage
-     *
-     * @param  ?string  $encoded_string
-     * @param  ?string  $old
-     * @param  ?string  $index
      */
     public function saveEncoded(string $type, ?string $encoded_string = null, ?string $old = null, ?string $index = null): ?string
     {
