@@ -11,6 +11,7 @@ test('can view dynamic', function () {
     Route::post('account', function (Request $request) {
         $u = $request->user();
         $u->save();
+
         return $u;
     });
 
@@ -19,7 +20,7 @@ test('can view dynamic', function () {
     $this->actingAs($user)->post('account', ['image' => UploadedFile::fake()->image('avatar.jpg')]);
 
     $encodedFilename = str($user->getFiles['image']['dynamicLink'])->afterLast('/')->toString();
-    $response = $this->actingAs($user)->get('image/' . $encodedFilename);
+    $response = $this->actingAs($user)->get('image/'.$encodedFilename);
 
     expect($response->baseResponse)->toBeInstanceOf(\Symfony\Component\HttpFoundation\BinaryFileResponse::class);
 });
@@ -30,17 +31,18 @@ test('can stream dynamic audio/video', function () {
     Route::post('account', function (Request $request) {
         $u = $request->user();
         $u->save();
+
         return $u;
     });
 
     Route::get('video/{file}', [FileController::class, 'show']);
 
-    $video = new UploadedFile(realpath(__DIR__ . '/../flowbite.mp4'), 'video.mp4', 'video/mp4', null, true);
+    $video = new UploadedFile(realpath(__DIR__.'/../flowbite.mp4'), 'video.mp4', 'video/mp4', null, true);
 
     $this->actingAs($user)->post('account', ['video' => $video]);
 
     $encodedFilename = str($user->getFiles['video']['dynamicLink'])->afterLast('/')->toString();
-    $response = $this->actingAs($user)->get('video/' . $encodedFilename);
+    $response = $this->actingAs($user)->get('video/'.$encodedFilename);
 
     expect($response->baseResponse)->toBeInstanceOf(\Symfony\Component\HttpFoundation\StreamedResponse::class);
 });
