@@ -435,7 +435,7 @@ class Media
             $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
             $file_path = $prefix . $this->getMedia($type, $src, true);
 
-            $mime = str(Storage::fileExists($file_path) ? Storage::mimeType($file_path) : 'unknown/unknown');
+            $mime = str($this->disk->fileExists($file_path) ? $this->disk->mimeType($file_path) : 'unknown/unknown');
 
             $file_url = $this->getMedia($type, $src) ?: (new Media)->getDefaultMedia($type);
 
@@ -454,7 +454,7 @@ class Media
             'ext' => str($src)->afterLast('.')->toString(),
             'type' => $mediaType,
             'mime' => $mime->toString(),
-            'size' => $mime->isNotEmpty() && Storage::fileExists($file_path) ? Storage::size($file_path) : 0,
+            'size' => $mime->isNotEmpty() && $this->disk->fileExists($file_path) ? $this->disk->size($file_path) : 0,
             'path' => $file_path,
             'isImage' => $isImage,
             'dynamicLink' => $dynamicLink,
