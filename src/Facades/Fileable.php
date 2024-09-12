@@ -2,6 +2,7 @@
 
 namespace ToneflixCode\LaravelFileable\Facades;
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Facade;
 use ToneflixCode\LaravelFileable\Streamer;
 
@@ -13,8 +14,9 @@ use ToneflixCode\LaravelFileable\Streamer;
  * @method static ?string getPath(string $type, string $src = null) Get the relative path of the file
  * @method static string getDefaultMedia(string $type)
  * @method static string dynamicFile() Render the private file
- * @method static ?string save(string $type, ?string $file_name = null, ?string $old = null, ?string $index = null) Save a file to the storage
+ * @method static ?string save(string $type, string|UploadedFile|null $file_name = null, ?string $old = null, ?string $index = null) Save a file to the storage
  * @method static ?string saveEncoded(string $type, ?string $encoded_string = null, ?string $old = null, ?string $index = null)
+ * @method static array{isImage:bool,path:string,url:string,type:string,mime:string,size:int,dynamicLink:string,secureLink:string} mediaInfo(string $type, ?string $src = null) Returns the attributes of a bound media file.
  * @method static array{cc:string,mm:string}|null cached(string $fileName) Save or retrieve a file from cache
  * @method static \Illuminate\Http\Response resizeResponse(string $fileName, string $size) Fetch the given image from the cache and resize it.
  * @method static ?string delete(string $type, string $src = null) Delete a file from the storage
