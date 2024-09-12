@@ -2,6 +2,7 @@
 
 namespace ToneflixCode\LaravelFileable;
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
@@ -205,13 +206,13 @@ class Media
      * Save a file to the storage
      *
      * @param  string  $type  The name of the collection where this file should be saved
-     * @param  ?string  $file_name  The request filename property
+     * @param  string|UploadedFile|null  $file_name  The request filename property
      * @param  ?string  $old  The name of the old existing file to be deleted
      * @param  string|int|null  $index  Current index of the file if saving in a loop
      */
     public function save(
         string $type,
-        ?string $file_name = null,
+        string|UploadedFile|null $file_name = null,
         ?string $old = null,
         string|int|null $index = null
     ): ?string {
@@ -229,17 +230,19 @@ class Media
         $fileKey = $fn->replace('.*.', ".$index.")->toString();
         $fileList = $fn->contains('.*.') ? Arr::dot($request->allFiles()) : null;
 
-        if ($request->hasFile($file_name) || isset($fileList[$fileKey])) {
+        if ($file_name instanceof UploadedFile || $request->hasFile($file_name) || isset($fileList[$fileKey])) {
 
             if ($old && $this->disk->fileExists($old_path) && $old !== 'default.png') {
                 $this->disk->delete($old_path);
             }
 
-            // If an index is provided get the file from the array by index
-            // This is useful when you have multiple files with the same name
-            if (isset($fileList[$fileKey])) {
+            if ($file_name instanceof UploadedFile) {
+                $requestFile = $file_name;
+            } else if (isset($fileList[$fileKey])) {
+                // If an index is provided get the file from the array by index
+                // This is useful when you have multiple files with the same name
                 $requestFile = $fileList[$fileKey];
-            } elseif (! is_null($index) && isset($request->file($file_name)[$index])) {
+            } else if (! is_null($index) && isset($request->file($file_name)[$index])) {
                 $requestFile = $request->file($file_name)[$index];
             } else {
                 $requestFile = $request->file($file_name);
@@ -255,7 +258,9 @@ class Media
             );
 
             // Reset the file instance
-            $request->offsetUnset($file_name);
+            if (is_string($file_name)) {
+                $request->offsetUnset($file_name);
+            }
 
             // If the file is an image resize it
             $size = Arr::get($this->namespaces, $type . '.size');
