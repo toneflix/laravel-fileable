@@ -2,6 +2,13 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## v2.0.8 - 2024-09-13
+
+- [Provide type info for mediaInfo Media Facade method](https://github.com/toneflix/laravel-fileable/commit/73dfe5f6b478d79b2b04215f7d54b698ec979b54)
+- [Allow saving files directly by passing UploadedFile instance as $file_name param to save method of Media class.](https://github.com/toneflix/laravel-fileable/commit/d21c311742723483a6ca402ba386e2f1a99ec011)
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.0.7...2.0.8
+
 ## 2.0.6 - 2024-07-29
 
 ### What's Changed
