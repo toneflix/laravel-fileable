@@ -238,11 +238,11 @@ class Media
 
             if ($file_name instanceof UploadedFile) {
                 $requestFile = $file_name;
-            } else if (isset($fileList[$fileKey])) {
+            } elseif (isset($fileList[$fileKey])) {
                 // If an index is provided get the file from the array by index
                 // This is useful when you have multiple files with the same name
                 $requestFile = $fileList[$fileKey];
-            } else if (! is_null($index) && isset($request->file($file_name)[$index])) {
+            } elseif (! is_null($index) && isset($request->file($file_name)[$index])) {
                 $requestFile = $request->file($file_name)[$index];
             } else {
                 $requestFile = $request->file($file_name);
