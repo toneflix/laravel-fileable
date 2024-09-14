@@ -9,7 +9,7 @@ use ToneflixCode\LaravelFileable\Streamer;
 /**
  * @see \ToneflixCode\LaravelFileable\Media
  *
- * @method ?string getMedia(string $type, string $src = null, $returnPath = false, $legacyMode = false) Fetch an file from the storage
+ * @method static ?string getMedia(string $type, string $src = null, $returnPath = false, $legacyMode = false) Fetch an file from the storage
  * @method static bool exists(string $type, string $src = null) Check if the file exists
  * @method static ?string getPath(string $type, string $src = null) Get the relative path of the file
  * @method static string getDefaultMedia(string $type)
