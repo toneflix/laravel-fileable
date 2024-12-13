@@ -1,6 +1,6 @@
 # Laravel Fileable
 
-[![ServBay](https://github.com/user-attachments/assets/cffc7f42-f5b1-4e0f-a2ae-4d61e90b2213)](https://www.servbay.com)
+[![ServBay](https://github.com/user-attachments/assets/030fcfad-95dc-40db-89b2-7ca1e8be3dce)](https://www.servbay.com)
 [![Test & Lint](https://github.com/toneflix/laravel-fileable/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/toneflix/laravel-fileable/actions/workflows/run-tests.yml)
 [![Latest Stable Version](https://img.shields.io/packagist/v/toneflix-code/laravel-fileable.svg)](https://packagist.org/packages/toneflix-code/laravel-fileable) 
 [![Total Downloads](https://img.shields.io/packagist/dt/toneflix-code/laravel-fileable.svg)](https://packagist.org/packages/toneflix-code/laravel-fileable) 
