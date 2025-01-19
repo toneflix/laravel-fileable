@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.1.2 - 2025-01-19
+
+* Emit the FileSaved event after saving a file
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.1.1...2.1.2
+
 ## 2.1.1 - 2025-01-19
 
 * feat: Add config option and implementation to allow file name customization when saving.
