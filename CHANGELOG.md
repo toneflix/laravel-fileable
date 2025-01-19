@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.1.3 - 2025-01-19
+
+* Add the original filename from the upload request to the FileSaved event payload.
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.1.2...2.1.3
+
 ## 2.1.2 - 2025-01-19
 
 * Emit the FileSaved event after saving a file
