@@ -362,7 +362,7 @@ What we have done is save the files from within a loop, the 4th parameter of the
 
 Everytime a file is saved, we emit the `\ToneflixCode\LaravelFileable\Events\FileSaved` event which you can listen to and perform further actions.
 
-The event signature, includes the current instance of the model that was saved and the associated `mediaFileInfo()`
+The event signature, includes the current instance of the model that was saved, the associated `mediaFileInfo()` and the original filename from the upload request file.
 
 _EventServiceProvider_ or anywhere else you listen to events
 
@@ -370,7 +370,7 @@ _EventServiceProvider_ or anywhere else you listen to events
 public function boot(): void
 {
     Event::listen(function (\ToneflixCode\LaravelFileable\Events\FileSaved $event) {
-        dd($event->model, $event->fileInfo);
+        dd($event->model, $event->fileInfo, $event->file_name);
     });
 }
 ```

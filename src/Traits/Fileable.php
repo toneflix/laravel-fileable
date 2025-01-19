@@ -354,34 +354,47 @@ trait Fileable
     public function saveImage(string|array|null $file_field = null, string $collection = 'default')
     {
         $request = request(null);
+        $mediaHandler = new Media(
+            disk: $this->disk,
+            getOriginalName: true
+        );
 
         $file_field = $file_field ?? $this->file_field;
         if (is_array($file_field)) {
             foreach ($file_field as $field => $collection) {
                 if ($this->checkBase64($request->get($field))) {
-                    $save_name = (new Media($this->disk))
+                    $output = $mediaHandler
                         ->saveEncoded($collection, $request->get($field), $this->{$this->getFieldName($field)});
                 } else {
-                    $save_name = (new Media($this->disk))
+                    $output = $mediaHandler
                         ->save($collection, $field, $this->{$this->getFieldName($field)});
                 }
+
+                $save_name = is_array($output) ? $output['new_name'] : $output;
+                $real_name = is_array($output) ? $output['original_name'] : $output;
+
                 // This maps to $this->image = $save_name where image is an existing database field
                 $this->{$this->getFieldName($field)} = $save_name;
                 $this->saveQuietly();
-                FileSaved::dispatch($this, $this->media_file_info);
+                FileSaved::dispatch($this, $this->media_file_info, $real_name);
             }
         } else {
             if ($this->checkBase64($request->get($file_field))) {
-                $save_name = (new Media($this->disk))
+                $output = $mediaHandler
                     ->saveEncoded($collection, $request->get($file_field), $this->{$this->getFieldName($file_field)});
             } else {
-                $save_name = (new Media($this->disk))
+                $output = $mediaHandler
                     ->save($collection, $file_field, $this->{$this->getFieldName($file_field)});
             }
+
+            $save_name = is_array($output) ? $output['new_name'] : $output;
+            $real_name = is_array($output) ? $output['original_name'] : $output;
+
             // This maps to $this->image = $save_name where image is an existing database field
             $this->{$this->getFieldName($file_field)} = $save_name;
             $this->saveQuietly();
-            FileSaved::dispatch($this, $this->media_file_info);
+
+            FileSaved::dispatch($this, $this->media_file_info, $real_name);
         }
     }
 
