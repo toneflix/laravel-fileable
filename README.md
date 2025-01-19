@@ -358,6 +358,23 @@ foreach ($valid['files'] as $i => $file) {
 
 What we have done is save the files from within a loop, the 4th parameter of the `save` method [`index`] indicates where the file we want to save can be found in the requests uploaded file list.
 
+## Events
+
+Everytime a file is saved, we emit the `\ToneflixCode\LaravelFileable\Events\FileSaved` event which you can listen to and perform further actions.
+
+The event signature, includes the current instance of the model that was saved and the associated `mediaFileInfo()`
+
+_EventServiceProvider_ or anywhere else you listen to events
+
+```php
+public function boot(): void
+{
+    Event::listen(function (\ToneflixCode\LaravelFileable\Events\FileSaved $event) {
+        dd($event->model, $event->fileInfo);
+    });
+}
+```
+
 ### Testing
 
 ```bash
