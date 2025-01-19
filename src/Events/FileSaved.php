@@ -13,9 +13,8 @@ class FileSaved
 
     /**
      * Create a new event instance.
-     * 
-     * @param Model $model
-     * @param array{url: string, ext: string, type: mixed, mime: mixed, size: int, path: string, isImage: mixed, dynamicLink: string, secureLink: string} $fileInfo
+     *
+     * @param  array{url: string, ext: string, type: mixed, mime: mixed, size: int, path: string, isImage: mixed, dynamicLink: string, secureLink: string}  $fileInfo
      */
     public function __construct(
         public Model $model,
