@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.1.0 - 2025-01-11
+
+- Register the fileable in the retrieved, creating, updating and saving events to allow for model based configuration.
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.0.9...2.1.0
+
 ## v2.0.8 - 2024-09-13
 
 - [Provide type info for mediaInfo Media Facade method](https://github.com/toneflix/laravel-fileable/commit/73dfe5f6b478d79b2b04215f7d54b698ec979b54)
