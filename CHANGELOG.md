@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.1.1 - 2025-01-19
+
+* feat: Add config option and implementation to allow file name customization when saving.
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.0.9...2.1.1
+
 ## 2.1.0 - 2025-01-11
 
 - Register the fileable in the retrieved, creating, updating and saving events to allow for model based configuration.
