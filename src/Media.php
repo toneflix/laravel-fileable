@@ -14,23 +14,28 @@ use ToneflixCode\LaravelFileable\Facades\Media as MediaFacade;
 
 class Media
 {
-    public $namespaces;
+    public bool $globalDefault = false;
 
-    public $globalDefault = false;
+    public string $default_media = 'media/default.png';
 
-    public $default_media = 'media/default.png';
+    public string $fileNamePattern = '000000000-000000000';
+
+    public array $namespaces;
 
     public \Intervention\Image\ImageManager $imageDriver;
 
     public \Illuminate\Contracts\Filesystem\Filesystem $disk;
 
-    public function __construct($storageDisc = null)
-    {
-        $this->namespaces = config('toneflix-fileable.collections');
+    public function __construct(
+        $storageDisc = null
+    ) {
+        $this->fileNamePattern = config('toneflix-fileable.file_name_pattern');
 
         $this->globalDefault = true;
 
         $this->imageDriver = new ImageManager(new Driver);
+
+        $this->namespaces = config('toneflix-fileable.collections');
 
         $this->disk = Storage::disk($storageDisc ?? Storage::getDefaultDriver());
     }
@@ -249,7 +254,9 @@ class Media
             }
 
             // Give the file a new name and append extension
-            $rename = rand().'_'.rand().'.'.$requestFile->extension();
+            $rename = Initiator::generateStringFromPattern(
+                $this->fileNamePattern ?? '000000000-000000000'
+            ).'.'.$requestFile->extension();
 
             $this->disk->putFileAs(
                 $prefix.$getPath, // Path
@@ -293,8 +300,12 @@ class Media
     /**
      * Save a base64 encoded image string to storage
      */
-    public function saveEncoded(string $type, ?string $encoded_string = null, ?string $old = null, ?string $index = null): ?string
-    {
+    public function saveEncoded(
+        string $type,
+        ?string $encoded_string = null,
+        ?string $old = null,
+        ?string $index = null
+    ): ?string {
         if (! $encoded_string) {
             return null;
         }
@@ -334,7 +345,9 @@ class Media
         ])->get($ext, $ext);
 
         // Give the file a new name and append extension
-        $rename = rand().'_'.rand().'.'.$extension;
+        $rename = Initiator::generateStringFromPattern(
+            $this->fileNamePattern ?? '000000000-000000000'
+        ).'.'.$extension;
         $path = $prefix.trim($getPath, '/').'/'.$rename;
 
         // Store the file

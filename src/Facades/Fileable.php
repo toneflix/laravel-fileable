@@ -37,7 +37,7 @@ class Fileable extends Facade
         string $path,
         string $mimeType,
         array $headers,
-    ): \ToneflixCode\LaravelFileable\Streamer {
+    ): Streamer {
         return new Streamer($path, $mimeType, $headers);
     }
 }

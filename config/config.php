@@ -5,6 +5,26 @@ return [
 
     /*
      |--------------------------------------------------------------------------
+     | File Name Pattern
+     |--------------------------------------------------------------------------
+     |
+     | When saving files, we will use this partern to generate the file name.
+     |
+     | Key:
+     |	A: Random uppercase letter.
+     |	a: Random lowercase letter.
+     |	0: Random digit (0–9).
+     |	-: A fixed hyphen.
+     |	X: Random alphanumeric character (both letters and digits).
+     |
+     | E.g. AAA-000000000-XXX
+     |
+    */
+
+    'file_name_pattern' => '000000000_000000000',
+
+    /*
+     |--------------------------------------------------------------------------
      | Streamable Mimes
      |--------------------------------------------------------------------------
      |

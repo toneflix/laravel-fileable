@@ -5,6 +5,7 @@ namespace ToneflixCode\LaravelFileable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Initiator
 {
@@ -84,5 +85,41 @@ class Initiator
 
         // Decode Base64 string and return the original data
         return base64_decode($b64, $strict);
+    }
+
+    /**
+     * Generate a string based on a mask partern
+     */
+    public static function generateStringFromPattern(string $pattern): string
+    {
+        $result = '';
+
+        // Loop through the pattern and generate corresponding random characters
+        for ($i = 0; $i < strlen($pattern); $i++) {
+            $char = $pattern[$i];
+
+            // Handle uppercase letters (A-Z)
+            if ($char === 'A') {
+                $result .= strtoupper(Str::random(1));
+            }
+            // Handle digits (0-9)
+            elseif ($char === '0') {
+                $result .= random_int(0, 9);
+            }
+            // Handle alphanumeric (A-Za-z0-9)
+            elseif ($char === 'X') {
+                $result .= Str::random(1);
+            }
+            // Handle underscore (_)
+            elseif ($char === '_') {
+                $result .= '_';
+            }
+            // Handle fixed hyphen (-) in the pattern
+            elseif ($char === '-') {
+                $result .= '-';
+            }
+        }
+
+        return $result;
     }
 }

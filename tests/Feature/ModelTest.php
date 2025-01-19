@@ -66,6 +66,21 @@ test('can save file directly by passing UploadedFile instance as $file_name para
     expect(file_exists($file))->toBeTrue();
 });
 
+test('file name matches default configured partern', function () {
+    $user = User::factory()->create();
+    Storage::fake('default');
+
+    Route::post('acc', function (Request $request) {
+        $u = $request->user();
+
+        return (new Media('default'))->save('avatar', $request->img, $u->image);
+    });
+
+    $response = $this->actingAs($user)->post('acc', ['img' => UploadedFile::fake()->image('avatar.jpg')]);
+
+    expect($response->original)->toMatch('/^[0-9]{9}_[0-9]{9}\.jpg$/');
+});
+
 test('can save files in a loop', function () {
     $user = User::factory()->create();
     Storage::fake('default');
