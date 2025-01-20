@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.1.4 - 2025-01-19
+
+* Pass the exact media_file_info to the fileInfo argument of the FileSaved event.
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.1.3...2.1.4
+
 ## 2.1.3 - 2025-01-19
 
 * Add the original filename from the upload request to the FileSaved event payload.
