@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.1.5 - 2025-03-18
+
+### What's Changed
+
+* Adds support for Laravel 12
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.1.4...2.1.5
+
 ## 2.1.4 - 2025-01-19
 
 * Pass the exact media_file_info to the fileInfo argument of the FileSaved event.
