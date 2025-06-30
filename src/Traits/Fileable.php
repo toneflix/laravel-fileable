@@ -223,7 +223,7 @@ trait Fileable
                     $images = [];
                     foreach ($this->file_field as $field => $collection) {
                         $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
-                            $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
+                            $prefix = (new Media($this->disk))->getPrefix($collection);
 
                             $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
@@ -241,7 +241,7 @@ trait Fileable
                     return $images;
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
-                        $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
+                        $prefix = (new Media($this->disk))->getPrefix($this->collection);
                         $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 

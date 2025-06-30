@@ -2,6 +2,7 @@
 
 namespace ToneflixCode\LaravelFileable;
 
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -37,8 +38,12 @@ class Initiator
     /**
      * Load public asset
      */
-    public static function asset(string $url, $absolute = false): string
+    public static function asset(string $url, $absolute = false, ?Filesystem $disk = null): string
     {
+        if ($disk && ! $disk instanceof \Illuminate\Filesystem\LocalFilesystemAdapter) {
+            return $disk->url('public/'.$url);
+        }
+
         if ($absolute) {
             return str($url)->replace('http:', request(null)->isSecure() ? 'https:' : 'http:')->toString();
         }

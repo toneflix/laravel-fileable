@@ -2,6 +2,7 @@
 
 namespace ToneflixCode\LaravelFileable;
 
+use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -91,7 +92,7 @@ class Media
         $getPath = Arr::get($this->namespaces, $type.'.path');
         $default = Arr::get($this->namespaces, $type.'.default');
 
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = $this->getPrefix($type);
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             $port = parse_url($src, PHP_URL_PORT);
@@ -101,7 +102,7 @@ class Media
                 return parse_url($src, PHP_URL_PATH);
             }
 
-            return Initiator::asset($url->replace('localhost', request(null)->getHttpHost()), true);
+            return Initiator::asset($url->replace('localhost', request(null)->getHttpHost()), true, $this->disk);
         }
 
         if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
@@ -116,27 +117,27 @@ class Media
                     return $this->default_media;
                 }
 
-                return Initiator::asset($this->default_media);
+                return Initiator::asset($this->default_media, false, $this->disk);
             }
 
             if ($returnPath === true) {
-                return Initiator::asset($getPath.$default, true);
+                return Initiator::asset($getPath.$default, true, $this->disk);
             }
 
-            return Initiator::asset($getPath.$default);
+            return Initiator::asset($getPath.$default, false, $this->disk);
         }
 
         if ($returnPath === true) {
-            return Initiator::asset($getPath.$src, true);
+            return Initiator::asset($getPath.$src, true, $this->disk);
         } elseif (str($type)->contains('private.')) {
             $secure = Arr::get($this->namespaces, $type.'.secure', false) === true ? 'secure' : 'open';
 
             return Initiator::asset(route("fileable.{$secure}.file", [
                 'file' => Initiator::base64urlEncode($getPath.$src),
-            ]), true);
+            ]), true, $this->disk);
         }
 
-        return Initiator::asset($getPath.$src);
+        return Initiator::asset($getPath.$src, false, $this->disk);
     }
 
     /**
@@ -145,7 +146,7 @@ class Media
     public function exists(string $type, ?string $src = null): bool
     {
         $getPath = Arr::get($this->namespaces, $type.'.path');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = $this->getPrefix($type);
 
         if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
             return false;
@@ -161,7 +162,7 @@ class Media
     {
         $getPath = Arr::get($this->namespaces, $type.'.path');
         $default = Arr::get($this->namespaces, $type.'.default');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = $this->getPrefix($type);
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             return parse_url($src, PHP_URL_PATH);
@@ -189,7 +190,7 @@ class Media
             return $default;
         }
 
-        return Initiator::asset($path.$default);
+        return Initiator::asset($path.$default, false, $this->disk);
     }
 
     /**
@@ -245,7 +246,7 @@ class Media
         $getPath = Arr::get($this->namespaces, $type.'.path');
 
         // Get the file path prefix
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = $this->getPrefix($type);
 
         $request = request(null);
         $old_path = $prefix.$getPath.$old;
@@ -344,7 +345,7 @@ class Media
         $getPath = Arr::get($this->namespaces, $type.'.path');
 
         // Get the file path prefix
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = $this->getPrefix($type);
 
         $old_path = $prefix.$getPath.$old;
 
@@ -480,7 +481,7 @@ class Media
             $file_path = $file_url = $dynamicLink = $secureLink = $src;
             $mime = str(\GuzzleHttp\Psr7\MimeType::fromFilename($src));
         } else {
-            $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+            $prefix = $this->getPrefix($type);
             $file_path = $prefix.$this->getMedia($type, $src, true);
 
             $mime = str($this->disk->fileExists($file_path) ? $this->disk->mimeType($file_path) : 'unknown/unknown');
@@ -518,7 +519,7 @@ class Media
     public function delete(string $type, ?string $src = null): ?string
     {
         $getPath = Arr::get($this->namespaces, $type.'.path');
-        $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
+        $prefix = $this->getPrefix($type);
 
         $path = $prefix.$getPath.$src;
 
@@ -527,5 +528,16 @@ class Media
         }
 
         return $path;
+    }
+
+    /**
+     * Get the path prefix for the selected colection
+     */
+    public function getPrefix(string $colection): string
+    {
+        return match (true) {
+            str($colection)->contains('private.') || $this->disk instanceof LocalFilesystemAdapter => '/',
+            default => 'public/',
+        };
     }
 }
