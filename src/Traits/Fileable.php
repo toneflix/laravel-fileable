@@ -91,10 +91,10 @@ trait Fileable
          * register the fileable in the retrieved, creating, updating and saving
          * events to allow for model based configuration.
          */
-        static::retrieved(fn (Fileable|Model $m) => $m->registerFileable());
-        static::creating(fn (Fileable|Model $m) => $m->registerFileable());
-        static::updating(fn (Fileable|Model $m) => $m->registerFileable());
-        static::saving(fn (Fileable|Model $m) => $m->registerFileable());
+        static::retrieved(fn(Fileable|Model $m) => $m->registerFileable());
+        static::creating(fn(Fileable|Model $m) => $m->registerFileable());
+        static::updating(fn(Fileable|Model $m) => $m->registerFileable());
+        static::saving(fn(Fileable|Model $m) => $m->registerFileable());
 
         static::saved(function (Fileable|Model $model) {
             if (is_array($model->file_field)) {
@@ -127,7 +127,7 @@ trait Fileable
     public function images(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->files,
+            get: fn() => $this->files,
         );
     }
 
@@ -208,7 +208,7 @@ trait Fileable
     public function defaultImage(): Attribute
     {
         return Attribute::make(
-            get: fn () => ($this->collection
+            get: fn() => ($this->collection
                 ? (new Media($this->disk))->getDefaultMedia($this->collection)
                 : asset('media/default.jpg')
             )
@@ -223,9 +223,9 @@ trait Fileable
                     $images = [];
                     foreach ($this->file_field as $field => $collection) {
                         $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
-                            $prefix = ! str($collection)->contains('private.') ? 'public/' : '/';
+                            $prefix = (new Media($this->disk))->getPrefix($collection);
 
-                            $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($field, $collection, true)))
+                            $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
 
                             if (! $isImage) {
@@ -241,8 +241,8 @@ trait Fileable
                     return $images;
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
-                        $prefix = ! str($this->collection)->contains('private.') ? 'public/' : '/';
-                        $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
+                        $prefix = (new Media($this->disk))->getPrefix($this->collection);
+                        $isImage = str(Storage::mimeType($prefix . $this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 
                         if (! $isImage) {
