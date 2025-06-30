@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 
 class Initiator
 {
@@ -18,18 +19,18 @@ class Initiator
     public static function collectionPaths(): array|Collection
     {
         $deepPaths = collect(config('toneflix-fileable.collections', []))->map(function ($col, $key) {
-            $getPath = Arr::get(config('toneflix-fileable.collections', []), $key.'.path');
+            $getPath = Arr::get(config('toneflix-fileable.collections', []), $key . '.path');
             $prefix = str($key)->contains('private') ? '/' : '/public/';
 
             if (! isset($col['path'])) {
-                return collect($col)->filter(fn ($k) => isset($k['path']))->map(function ($k, $path) use ($key, $prefix) {
-                    $getPath = Arr::get(config('toneflix-fileable.collections', []), $key.'.'.$path.'.path');
+                return collect($col)->filter(fn($k) => isset($k['path']))->map(function ($k, $path) use ($key, $prefix) {
+                    $getPath = Arr::get(config('toneflix-fileable.collections', []), $key . '.' . $path . '.path');
 
-                    return Storage::path($prefix.$getPath);
+                    return Storage::path($prefix . $getPath);
                 })->values();
             }
 
-            return Storage::path($prefix.$getPath);
+            return Storage::path($prefix . $getPath);
         });
 
         return $deepPaths->flatten()->unique();
@@ -40,8 +41,8 @@ class Initiator
      */
     public static function asset(string $url, $absolute = false, ?Filesystem $disk = null): string
     {
-        if ($disk && ! $disk instanceof \Illuminate\Filesystem\LocalFilesystemAdapter) {
-            return $disk->url('public/'.$url);
+        if ($disk && ! $disk->getAdapter() instanceof LocalFilesystemAdapter) {
+            return $disk->url($url);
         }
 
         if ($absolute) {
