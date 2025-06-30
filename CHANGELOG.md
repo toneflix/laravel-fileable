@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.1.6 - 2025-06-30
+
+### What's Changed
+
+* feat: Check if file is a local asset, call the $disk->url() method to retrive asset url if it's not. by @3m1n3nc3 in https://github.com/toneflix/laravel-fileable/pull/26
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.1.5...2.1.6
+
 ## 2.1.5 - 2025-03-18
 
 ### What's Changed
