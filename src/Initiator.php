@@ -41,6 +41,10 @@ class Initiator
      */
     public static function asset(string $url, $absolute = false, ?Filesystem $disk = null): string
     {
+        if (filter_var($src, FILTER_VALIDATE_URL)) {
+            return $url;
+        }
+        
         if ($disk && ! $disk->getAdapter() instanceof LocalFilesystemAdapter) {
             return $disk->url($url);
         }
