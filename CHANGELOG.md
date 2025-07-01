@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 2.1.7 - 2025-07-01
+
+### What's Changed
+
+* If final $url is a valid url just return it. by @3m1n3nc3 in https://github.com/toneflix/laravel-fileable/pull/27
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.1.6...2.1.7
+
 ## 2.1.6 - 2025-06-30
 
 ### What's Changed
