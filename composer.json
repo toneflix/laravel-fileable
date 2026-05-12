@@ -32,7 +32,7 @@
     "laravel/pint": "^1.15",
     "orchestra/testbench": "^10.11|^11.1",
     "pestphp/pest": "^3.0",
-    "pestphp/pest-plugin-laravel": "^3.0",
+    "pestphp/pest-plugin-laravel": "^4.1",
     "phpstan/phpstan": "^2.1"
   },
   "autoload": {
