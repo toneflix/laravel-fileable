@@ -69,6 +69,22 @@ php artisan storage:link
 
 The `collection` config option define where files should be stored and optionally a default file that should be returned when the requested file is not found.
 
+### `collection.*.secure` [*boolean*: false]
+
+Indicates if the collection should use the secure middleware for route definition.
+
+### `collection.*.path` [*string*]
+
+Defines where the collection should store and look for files.
+
+### `collection.*.disk` [*string*: local]
+
+Defines the disk used to store and retrieve files by the collection.
+
+### `collection.*.default` [*string*]
+
+Defines the file name the collection should try to load when requested file is not found.
+
 ### Image Sizes
 
 This package uses [Intervention Imagecache](https://github.com/Intervention/imagecache) to generate responsive images for image files on demand, the `image_sizes` config option defines which responsive sizes to generate, you are not limited to use the defined sizes, take a look at [Intervention Imagecache Documentation](https://image.intervention.io/v2/usage/cache) for information about customizsing this feature.

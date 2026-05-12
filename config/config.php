@@ -156,6 +156,7 @@ return [
             'files' => [
                 'path' => 'files/',
                 'secure' => false,
+                'disk' => 'local',
             ],
             'images' => [
                 'path' => 'files/images/',
