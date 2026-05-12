@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 3.0.1 - 2026-05-12
+
+### What's Changed
+
+* Changed the project namespace from `toneflix-code` to `toneflix`
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/3.0.0...3.0.1
+
 ## 3.0.0 - 2026-05-12
 
 ### What's Changed
