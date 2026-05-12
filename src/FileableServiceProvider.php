@@ -11,7 +11,7 @@ class FileableServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->loadRoutesFrom(__DIR__ . '/../routes/routes.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/routes.php');
 
         config([
             'filesystems.links' => collect(config('filesystems.links'))
@@ -24,7 +24,7 @@ class FileableServiceProvider extends ServiceProvider
          */
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/config.php' => config_path('toneflix-fileable.php'),
+                __DIR__.'/../config/config.php' => config_path('toneflix-fileable.php'),
             ], 'config');
         }
     }
@@ -35,7 +35,7 @@ class FileableServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'toneflix-fileable');
+        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'toneflix-fileable');
 
         // Register the main class to use with the facade
         $this->app->singleton('laravel-fileable', function () {
