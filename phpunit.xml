@@ -20,13 +20,13 @@
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
-    <coverage>
+    <!-- <coverage>
         <report>
             <html outputDirectory="build/coverage" />
             <text outputFile="build/coverage.txt" />
             <clover outputFile="build/logs/clover.xml" />
         </report>
-    </coverage>
+    </coverage> -->
     <logging>
         <junit outputFile="build/report.junit.xml" />
     </logging>
@@ -45,6 +45,6 @@
         <server name="MAIL_DRIVER" value="array" />
         <server name="QUEUE_CONNECTION" value="sync" />
         <server name="SESSION_DRIVER" value="array" />
-        <server name="XDEBUG_MODE" value="coverage" />
+        <!-- <server name="XDEBUG_MODE" value="coverage" /> -->
     </php>
 </phpunit>
