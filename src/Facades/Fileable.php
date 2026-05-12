@@ -4,10 +4,11 @@ namespace ToneflixCode\LaravelFileable\Facades;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Facade;
+use ToneflixCode\LaravelFileable\Media;
 use ToneflixCode\LaravelFileable\Streamer;
 
 /**
- * @see \ToneflixCode\LaravelFileable\Media
+ * @see Media
  *
  * @method static ?string getMedia(string $type, string $src = null, $returnPath = false, $legacyMode = false) Fetch an file from the storage
  * @method static bool exists(string $type, string $src = null) Check if the file exists
