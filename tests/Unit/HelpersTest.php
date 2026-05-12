@@ -1,6 +1,6 @@
 <?php
 
-use ToneflixCode\LaravelFileable\Initiator;
+use Toneflix\LaravelFileable\Initiator;
 
 it('generates a string matching the pattern [A-Za-z0-9]{5}-[0-9]{3}-[A-Za-z0-9]{8}', function () {
     $pattern = 'AAAAA-000-XXXXXXXX';

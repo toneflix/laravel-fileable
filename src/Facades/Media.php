@@ -1,8 +1,8 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable\Facades;
+namespace Toneflix\LaravelFileable\Facades;
 
 /**
- * @see \ToneflixCode\LaravelFileable\Media
+ * @see \Toneflix\LaravelFileable\Media
  */
 class Media extends Fileable {}

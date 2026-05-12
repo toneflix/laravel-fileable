@@ -1,6 +1,6 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable\Events;
+namespace Toneflix\LaravelFileable\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Database\Eloquent\Model;

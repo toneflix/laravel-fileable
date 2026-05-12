@@ -27,20 +27,35 @@ Laravel automatically discovers and publishes service providers but optionally a
 In the $providers array add the service providers for this package.
 
 ```php
-ToneflixCode\LaravelFileable\FileableServiceProvider::class
+Toneflix\LaravelFileable\FileableServiceProvider::class
 ```
 
 Add the facade of this package to the $aliases array.
 
 ```php
-'Fileable' => ToneflixCode\LaravelFileable\Facades\Fileable::class
+'Fileable' => Toneflix\LaravelFileable\Facades\Fileable::class
 ```
 
 ## Upgrading
 
+### 2.x > 3.x
+
+When upgrading from `2.x` to `3.x`, take note of the breaking changes
+
+#### Dependencies
+
+- **PHP**: `3.x` only has support for PHP `^8.3|^8.4`
+- **Laravel**: `3.x` only has support for Laravel `^12.x|^13.x`
+
+#### Namespace
+
+We dropped the `ToneflixCode\LaravelFileable` and opted for a simpler `Toneflix\LaravelFileable`, take note of this and refactor your code as required.
+
+### 1.x > 2.x
+
 Version 2.x is not compatible with version 1.x, if you are ugrading from version 1.x here are a few notes:
 
-### Config
+#### Config
 
 1. If you published the configuration file, remove `image_templates`. Templates are no longer needed, just set you responsive image sizes using the `image_sizes` property.
 
@@ -52,7 +67,7 @@ By default Laravel Fileable `avatar` and `media` directories and symlinks to you
 You may change this or decide to modify the directories that will be created by running the following artisan command.
 
 ```bash
-php artisan vendor:publish --provider="ToneflixCode\LaravelFileable\FileableServiceProvider"
+php artisan vendor:publish --provider="Toneflix\LaravelFileable\FileableServiceProvider"
 ```
 
 The configuration file is copied to config/toneflix-fileable.php. With this copy you can alter the settings for your application locally.
@@ -111,14 +126,14 @@ The `image_templates` option generates image filters based on [Intervention Imag
 
 ## Usage
 
-To automatically discover files in request and save them to storage and database you will need to add the `ToneflixCode\LaravelFileable\Traits\Fileable` trait to your models and register the required filables using the `fileableLoader()` method from the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
+To automatically discover files in request and save them to storage and database you will need to add the `Toneflix\LaravelFileable\Traits\Fileable` trait to your models and register the required filables using the `fileableLoader()` method from the `Toneflix\LaravelFileable\Traits\Fileable` trait.
 
 ```php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use ToneflixCode\LaravelFileable\Traits\Fileable;
+use Toneflix\LaravelFileable\Traits\Fileable;
 
 class User extends Model
 {
@@ -237,7 +252,7 @@ In the last example, `cover_image` is an existing database field mapped to the `
 
 ### Model Events
 
-If you use listen to laravel events via the `boot()` you would need to move your event handles to the `registerEvents()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait.
+If you use listen to laravel events via the `boot()` you would need to move your event handles to the `registerEvents()` method of the `Toneflix\LaravelFileable\Traits\Fileable` trait.
 
 This should be defined in your model to overide the default handles.
 
@@ -256,7 +271,7 @@ Laravel Fileable exposes 3 model Attributes which will help with accessing your 
 
 #### defaultImage()
 
-This attribute exposes the default image of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+This attribute exposes the default image of the `Toneflix\LaravelFileable\Traits\Fileable` trait
 
 Depending on the collections you have created, you may need to add the default image file to the respective directories within the collections.
 
@@ -296,7 +311,7 @@ var_dump($user->get_files['image']);
 
 #### files()
 
-This attribute exposes all images registered with the `fileableLoader()` method of the `ToneflixCode\LaravelFileable\Traits\Fileable` trait
+This attribute exposes all images registered with the `fileableLoader()` method of the `Toneflix\LaravelFileable\Traits\Fileable` trait
 
 ```php
 $user = User::first();
@@ -330,12 +345,12 @@ While the library will try to resolve media files from the configured collection
 You can also skip the interface and use the `save` method of `Media` library to manually create your files, the `save` method returns the name of the file as saved in your configured storage.
 
 ```php
-use ToneflixCode\LaravelFileable\Media;
+use Toneflix\LaravelFileable\Media;
 use App\Models\User;
 
 $user = User::find(1);
 
-$user->image = \ToneflixCode\LaravelFileable\Facades\Media::save('media', "image", $user->image);
+$user->image = \Toneflix\LaravelFileable\Facades\Media::save('media', "image", $user->image);
 $user->saveQuietly();
 ```
 
@@ -354,7 +369,7 @@ Consider the following two scenarios in a controller.
 foreach ($fields as $i => $form) {
     $user = \App\Models\User::find($form['id']);
 
-    $user->image = \ToneflixCode\LaravelFileable\Facades\Media::save('media', "users.*.image", $user->image, $i);
+    $user->image = \Toneflix\LaravelFileable\Facades\Media::save('media', "users.*.image", $user->image, $i);
     $user->saveQuietly();
 }
 ```
@@ -367,7 +382,7 @@ $valid = $this->validate($request, [
 
 foreach ($valid['files'] as $i => $file) {
     $file = new \App\Models\Audio();
-    $file->image = \ToneflixCode\LaravelFileable\Facades\Media::save('audio', "files.*", null, $i);
+    $file->image = \Toneflix\LaravelFileable\Facades\Media::save('audio', "files.*", null, $i);
     $file->saveQuietly();
 }
 ```
@@ -376,7 +391,7 @@ What we have done is save the files from within a loop, the 4th parameter of the
 
 ## Events
 
-Everytime a file is saved, we emit the `\ToneflixCode\LaravelFileable\Events\FileSaved` event which you can listen to and perform further actions.
+Everytime a file is saved, we emit the `\Toneflix\LaravelFileable\Events\FileSaved` event which you can listen to and perform further actions.
 
 The event signature, includes the current instance of the model that was saved, the associated `mediaFileInfo()` and the original filename from the upload request file.
 
@@ -385,7 +400,7 @@ _EventServiceProvider_ or anywhere else you listen to events
 ```php
 public function boot(): void
 {
-    Event::listen(function (\ToneflixCode\LaravelFileable\Events\FileSaved $event) {
+    Event::listen(function (\Toneflix\LaravelFileable\Events\FileSaved $event) {
         dd($event->model, $event->fileInfo, $event->file_name);
     });
 }

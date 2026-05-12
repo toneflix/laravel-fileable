@@ -1,9 +1,9 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable\Controllers;
+namespace Toneflix\LaravelFileable\Controllers;
 
 use Illuminate\Routing\Controller;
-use ToneflixCode\LaravelFileable\Facades\Media;
+use Toneflix\LaravelFileable\Facades\Media;
 
 class FileController extends Controller
 {

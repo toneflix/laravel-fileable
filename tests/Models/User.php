@@ -1,11 +1,11 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable\Tests\Models;
+namespace Toneflix\LaravelFileable\Tests\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use ToneflixCode\LaravelFileable\Traits\Fileable;
+use Toneflix\LaravelFileable\Traits\Fileable;
 
 class User extends Authenticatable
 {

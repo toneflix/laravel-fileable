@@ -4,8 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use ToneflixCode\LaravelFileable\Controllers\FileController;
-use ToneflixCode\LaravelFileable\Tests\Models\User;
+use Toneflix\LaravelFileable\Controllers\FileController;
+use Toneflix\LaravelFileable\Tests\Models\User;
 
 test('can view dynamic', function () {
     $user = User::factory()->create();
@@ -22,7 +22,7 @@ test('can view dynamic', function () {
     $this->actingAs($user)->post('account', ['image' => UploadedFile::fake()->image('avatar.jpg')]);
 
     $encodedFilename = str($user->getFiles['image']['dynamicLink'])->afterLast('/')->toString();
-    $response = $this->actingAs($user)->get('image/'.$encodedFilename);
+    $response = $this->actingAs($user)->get('image/' . $encodedFilename);
 
     expect($response->baseResponse)->toBeInstanceOf(BinaryFileResponse::class);
 });
@@ -39,12 +39,12 @@ test('can stream dynamic audio/video', function () {
 
     Route::get('video/{file}', [FileController::class, 'show']);
 
-    $video = new UploadedFile(realpath(__DIR__.'/../flowbite.mp4'), 'video.mp4', 'video/mp4', null, true);
+    $video = new UploadedFile(realpath(__DIR__ . '/../flowbite.mp4'), 'video.mp4', 'video/mp4', null, true);
 
     $this->actingAs($user)->post('account', ['video' => $video]);
 
     $encodedFilename = str($user->getFiles['video']['dynamicLink'])->afterLast('/')->toString();
-    $response = $this->actingAs($user)->get('video/'.$encodedFilename);
+    $response = $this->actingAs($user)->get('video/' . $encodedFilename);
 
     expect($response->baseResponse)->toBeInstanceOf(StreamedResponse::class);
 });

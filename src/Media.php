@@ -1,6 +1,6 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable;
+namespace Toneflix\LaravelFileable;
 
 use GuzzleHttp\Psr7\MimeType;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use ToneflixCode\LaravelFileable\Facades\Media as MediaFacade;
+use Toneflix\LaravelFileable\Facades\Media as MediaFacade;
 
 class Media
 {
@@ -67,7 +67,7 @@ class Media
      */
     public function setCollectionDisk(string $collection): void
     {
-        if ($disk = Arr::get($this->namespaces, $collection.'.disk')) {
+        if ($disk = Arr::get($this->namespaces, $collection . '.disk')) {
             $this->disk = Storage::disk($disk);
         }
     }
@@ -102,14 +102,14 @@ class Media
             $src = str($src)->after(':')->__toString();
         }
 
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $default = Arr::get($this->namespaces, $type.'.default');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
 
         $prefix = $this->getPrefix($type);
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             $port = parse_url($src, PHP_URL_PORT);
-            $url = str($src)->replace('localhost:'.$port, 'localhost');
+            $url = str($src)->replace('localhost:' . $port, 'localhost');
 
             if ($returnPath === true) {
                 return parse_url($src, PHP_URL_PATH);
@@ -118,14 +118,14 @@ class Media
             return Initiator::asset($url->replace('localhost', request(null)->getHttpHost()), true, $this->disk);
         }
 
-        if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
+        if (! $src || ! $this->disk->exists($prefix . $getPath . $src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
                 if ($returnPath === true) {
                     return parse_url($default, PHP_URL_PATH);
                 }
 
                 return $default;
-            } elseif (! $this->disk->exists($prefix.$getPath.$default)) {
+            } elseif (! $this->disk->exists($prefix . $getPath . $default)) {
                 if ($returnPath === true) {
                     return $this->default_media;
                 }
@@ -134,23 +134,23 @@ class Media
             }
 
             if ($returnPath === true) {
-                return Initiator::asset($getPath.$default, true, $this->disk);
+                return Initiator::asset($getPath . $default, true, $this->disk);
             }
 
-            return Initiator::asset($getPath.$default, false, $this->disk);
+            return Initiator::asset($getPath . $default, false, $this->disk);
         }
 
         if ($returnPath === true) {
-            return Initiator::asset($getPath.$src, true, $this->disk);
+            return Initiator::asset($getPath . $src, true, $this->disk);
         } elseif (str($type)->contains('private.')) {
-            $secure = Arr::get($this->namespaces, $type.'.secure', false) === true ? 'secure' : 'open';
+            $secure = Arr::get($this->namespaces, $type . '.secure', false) === true ? 'secure' : 'open';
 
             return Initiator::asset(route("fileable.{$secure}.file", [
-                'file' => Initiator::base64urlEncode($getPath.$src),
+                'file' => Initiator::base64urlEncode($getPath . $src),
             ]), true, $this->disk);
         }
 
-        return Initiator::asset($getPath.$src, false, $this->disk);
+        return Initiator::asset($getPath . $src, false, $this->disk);
     }
 
     /**
@@ -160,10 +160,10 @@ class Media
     {
         $this->setCollectionDisk($type);
 
-        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
         $prefix = $this->getPrefix($type);
 
-        if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
+        if (! $src || ! $this->disk->exists($prefix . $getPath . $src)) {
             return false;
         }
 
@@ -176,38 +176,38 @@ class Media
     public function getPath(string $type, ?string $src = null): ?string
     {
         $this->setCollectionDisk($type);
-        $getPath = Arr::get($this->namespaces, $type.'.path');
-        $default = Arr::get($this->namespaces, $type.'.default');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
         $prefix = $this->getPrefix($type);
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             return parse_url($src, PHP_URL_PATH);
         }
 
-        if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
+        if (! $src || ! $this->disk->exists($prefix . $getPath . $src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
                 return parse_url($default, PHP_URL_PATH);
-            } elseif (! $this->disk->exists($prefix.$getPath.$default)) {
+            } elseif (! $this->disk->exists($prefix . $getPath . $default)) {
                 return $this->default_media;
             }
 
-            return $getPath.$default;
+            return $getPath . $default;
         }
 
-        return $getPath.$src;
+        return $getPath . $src;
     }
 
     public function getDefaultMedia(string $type): string
     {
         $this->setCollectionDisk($type);
-        $default = Arr::get($this->namespaces, $type.'.default');
-        $path = Arr::get($this->namespaces, $type.'.path');
+        $default = Arr::get($this->namespaces, $type . '.default');
+        $path = Arr::get($this->namespaces, $type . '.path');
 
         if (filter_var($default, FILTER_VALIDATE_URL)) {
             return $default;
         }
 
-        return Initiator::asset($path.$default, false, $this->disk);
+        return Initiator::asset($path . $default, false, $this->disk);
     }
 
     /**
@@ -220,8 +220,8 @@ class Media
         $src = Initiator::base64urlDecode($file);
         $path = str($src)->trim('/')->before('/');
         $namespace = $this->namespaces['private'] ?? [];
-        $key = collect($namespace)->search(fn ($item) => str($item['path'] ?? '')->contains($path)) ?: 'files';
-        $this->setCollectionDisk('private.'.$key);
+        $key = collect($namespace)->search(fn($item) => str($item['path'] ?? '')->contains($path)) ?: 'files';
+        $this->setCollectionDisk('private.' . $key);
 
         $headers = [
             'Cross-Origin-Resource-Policy' => 'cross-origin',
@@ -265,13 +265,13 @@ class Media
     ): string|array|null {
         $this->setCollectionDisk($type);
         // Get the file path
-        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
 
         // Get the file path prefix
         $prefix = $this->getPrefix($type);
 
         $request = request(null);
-        $old_path = $prefix.$getPath.$old;
+        $old_path = $prefix . $getPath . $old;
 
         // Adds support for saving files from an array index using wildcard request access
         $fn = str($file_name);
@@ -302,10 +302,10 @@ class Media
             // Give the file a new name and append extension
             $new_name = Initiator::generateStringFromPattern(
                 $this->fileNamePattern ?? '000000000-000000000'
-            ).'.'.$requestFile->extension();
+            ) . '.' . $requestFile->extension();
 
             $this->disk->putFileAs(
-                $prefix.$getPath, // Path
+                $prefix . $getPath, // Path
                 $requestFile, // Request File
                 $new_name // Directory
             );
@@ -316,15 +316,15 @@ class Media
             }
 
             // If the file is an image resize it
-            $size = Arr::get($this->namespaces, $type.'.size');
+            $size = Arr::get($this->namespaces, $type . '.size');
 
             $mime = $requestFile->getMimeType();
 
-            $size = Arr::get($this->namespaces, $type.'.size');
+            $size = Arr::get($this->namespaces, $type . '.size');
 
             // If the file is an image resize it if size is available
             if ($size && str($mime)->contains('image')) {
-                $this->imageDriver->read($this->disk->path($prefix.$getPath.$new_name))
+                $this->imageDriver->read($this->disk->path($prefix . $getPath . $new_name))
                     ->cover(Arr::first($size), Arr::last($size))
                     ->save();
             }
@@ -365,12 +365,12 @@ class Media
         $this->setCollectionDisk($type);
 
         // Get the file path
-        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
 
         // Get the file path prefix
         $prefix = $this->getPrefix($type);
 
-        $old_path = $prefix.$getPath.$old;
+        $old_path = $prefix . $getPath . $old;
 
         // Delete the old file
         if ($old && $this->disk->fileExists($old_path) && $old !== 'default.png') {
@@ -401,8 +401,8 @@ class Media
         // Give the file a new name and append extension
         $rename = Initiator::generateStringFromPattern(
             $this->fileNamePattern ?? '000000000-000000000'
-        ).'.'.$extension;
-        $path = $prefix.trim($getPath, '/').'/'.$rename;
+        ) . '.' . $extension;
+        $path = $prefix . trim($getPath, '/') . '/' . $rename;
 
         // Store the file
         $this->disk->put($path, base64_decode($encoded_string));
@@ -429,7 +429,7 @@ class Media
             // Loop through all the filesystems.links to find the file
             foreach (collect(config('filesystems.links'))->values() as $path) {
                 $file = collect(File::allFiles($path))
-                    ->firstWhere(fn ($e) => $e->getFilename() === $fileName && str(File::mimeType($e))->contains('image'));
+                    ->firstWhere(fn($e) => $e->getFilename() === $fileName && str(File::mimeType($e))->contains('image'));
 
                 if (! $file) {
                     continue;
@@ -506,7 +506,7 @@ class Media
             $mime = str(MimeType::fromFilename($src));
         } else {
             $prefix = $this->getPrefix($type);
-            $file_path = $prefix.$this->getMedia($type, $src, true);
+            $file_path = $prefix . $this->getMedia($type, $src, true);
 
             $mime = str($this->disk->fileExists($file_path) ? $this->disk->mimeType($file_path) : 'unknown/unknown');
 
@@ -543,10 +543,10 @@ class Media
     public function delete(string $type, ?string $src = null): ?string
     {
         $this->setCollectionDisk($type);
-        $getPath = Arr::get($this->namespaces, $type.'.path');
+        $getPath = Arr::get($this->namespaces, $type . '.path');
         $prefix = $this->getPrefix($type);
 
-        $path = $prefix.$getPath.$src;
+        $path = $prefix . $getPath . $src;
 
         if ($src && $this->disk->exists($path) && $src !== 'default.png') {
             $this->disk->delete($path);

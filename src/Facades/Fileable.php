@@ -1,11 +1,11 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable\Facades;
+namespace Toneflix\LaravelFileable\Facades;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Facade;
-use ToneflixCode\LaravelFileable\Media;
-use ToneflixCode\LaravelFileable\Streamer;
+use Toneflix\LaravelFileable\Media;
+use Toneflix\LaravelFileable\Streamer;
 
 /**
  * @see Media

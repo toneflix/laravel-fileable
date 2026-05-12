@@ -1,10 +1,10 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable\Tests\Database\Factories;
+namespace Toneflix\LaravelFileable\Tests\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use ToneflixCode\LaravelFileable\Tests\Models\User;
+use Toneflix\LaravelFileable\Tests\Models\User;
 
 class UserFactory extends Factory
 {

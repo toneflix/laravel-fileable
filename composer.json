@@ -43,16 +43,17 @@
   },
   "autoload": {
     "psr-4": {
-      "ToneflixCode\\LaravelFileable\\": "src"
+      "Toneflix\\LaravelFileable\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "ToneflixCode\\LaravelFileable\\Tests\\": "tests",
-      "ToneflixCode\\LaravelFileable\\Tests\\Database\\Factories\\": "tests/database/factories"
+      "Toneflix\\LaravelFileable\\Tests\\": "tests",
+      "Toneflix\\LaravelFileable\\Tests\\Database\\Factories\\": "tests/database/factories"
     }
   },
   "scripts": {
+    "pest": "vendor/bin/pest",
     "test": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
     "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
   },
@@ -65,10 +66,10 @@
   "extra": {
     "laravel": {
       "providers": [
-        "ToneflixCode\\LaravelFileable\\FileableServiceProvider"
+        "Toneflix\\LaravelFileable\\FileableServiceProvider"
       ],
       "aliases": {
-        "LaravelFileable": "ToneflixCode\\LaravelFileable\\Facades\\Fileable"
+        "LaravelFileable": "Toneflix\\LaravelFileable\\Facades\\Fileable"
       }
     }
   },

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use ToneflixCode\LaravelFileable\Controllers\FileController;
+use Toneflix\LaravelFileable\Controllers\FileController;
 
 // The public private secure generator route
 Route::get(config('toneflix-fileable.file_route_secure', 'load/images/{file}'), [FileController::class, 'show'])

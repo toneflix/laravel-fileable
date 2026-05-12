@@ -1,13 +1,13 @@
 <?php
 
-namespace ToneflixCode\LaravelFileable\Tests;
+namespace Toneflix\LaravelFileable\Tests;
 
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase as Orchestra;
-use ToneflixCode\LaravelFileable\FileableServiceProvider;
-use ToneflixCode\LaravelFileable\Tests\Database\Factories\UserFactory;
+use Toneflix\LaravelFileable\FileableServiceProvider;
+use Toneflix\LaravelFileable\Tests\Database\Factories\UserFactory;
 
 abstract class TestCase extends Orchestra
 {
@@ -29,16 +29,16 @@ abstract class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'ToneflixCode\\LaravelFileable\\Tests\\Database\\Factories\\'.
+            fn(string $modelName) => 'Toneflix\\LaravelFileable\\Tests\\Database\\Factories\\' .
                 class_basename(
                     $modelName
-                ).'Factory'
+                ) . 'Factory'
         );
     }
 
     protected function defineDatabaseMigrations()
     {
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
     }
 
     protected function getPackageProviders($app)
