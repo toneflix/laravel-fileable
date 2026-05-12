@@ -2,6 +2,20 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 3.0.2 - 2026-05-12
+
+### What's Changed
+
+Refactor namespace from `ToneflixCode` to `Toneflix`
+
+- Updated all occurrences of the namespace from ToneflixCode\LaravelFileable to Toneflix\LaravelFileable across the codebase.
+- Adjusted README.md to reflect the changes in service provider and facade aliases.
+- Modified composer.json to align with the new namespace structure.
+- Updated routes, controllers, events, facades, media, and traits to use the new namespace.
+- Refactored tests to ensure compatibility with the new namespace.
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/3.0.1...3.0.2
+
 ## 3.0.1 - 2026-05-12
 
 ### What's Changed
