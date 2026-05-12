@@ -1,7 +1,13 @@
 {
-  "name": "toneflix-code/laravel-fileable",
+  "name": "toneflix/laravel-fileable",
   "description": "Laravel Fileable exposes methods that make handling file upload with Laravel filesystem even easier, it also exposes a trait that automatically handles file uploads for you.",
   "keywords": [
+    "toneflix",
+    "files",
+    "disk",
+    "storage",
+    "laravel",
+    "file managemanet",
     "toneflix-code",
     "laravel-fileable",
     "version 2.x"
