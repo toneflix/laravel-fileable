@@ -2,6 +2,16 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 3.0.0 - 2026-05-12
+
+### What's Changed
+
+* Add support for Laravel 13.x.
+* Drop support for Laravel <12.x.
+* Add `collection.*.disk` config to set per-collection dist configuration.
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/2.1.7...3.0.0
+
 ## 2.1.7 - 2025-07-01
 
 ### What's Changed
