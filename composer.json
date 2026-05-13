@@ -54,7 +54,7 @@
   },
   "scripts": {
     "pest": "vendor/bin/pest",
-    "test": "XDEBUG_MODE=coverage vendor/bin/pest --coverage",
+    "test": "XDEBUG_MODE=coverage ./vendor/bin/pest --coverage --display-errors --testdox --coverage-clover ./build/logs/clover.xml",
     "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
   },
   "config": {
