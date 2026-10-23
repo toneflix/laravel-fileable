@@ -582,6 +582,9 @@ class Media
      */
     protected function remoteResponse(string $src, array $headers = [])
     {
+        // Object keys have no leading slash
+        $src = ltrim($src, '/');
+
         try {
             $url = $this->disk->temporaryUrl(
                 $src,
