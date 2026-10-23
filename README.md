@@ -96,9 +96,21 @@ Defines where the collection should store and look for files.
 
 Defines the disk used to store and retrieve files by the collection.
 
+### `collection.*.visibility` [*string*: null]
+
+Sets the visibility (`public` or `private`) of files saved to the collection. When not set, the disk's own `visibility` setting is used.
+
 ### `collection.*.default` [*string*]
 
 Defines the file name the collection should try to load when requested file is not found.
+
+### Remote disks (S3 and S3-compatible storage)
+
+Collections can be stored on any Laravel disk, including `s3`. On remote disks:
+
+- Images are resized before they are uploaded.
+- Links come from the disk's `url()`, or from `temporaryUrl()` when `temporary_urls` is `true` (use this for private buckets). `temporary_url_ttl` sets how many minutes signed links last.
+- Dynamic and secure file routes redirect to a short-lived signed URL when the disk supports it, so the storage service handles range requests for audio and video, and stream the file otherwise.
 
 ### Image Sizes
 

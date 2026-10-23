@@ -61,6 +61,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Temporary URLs
+    |--------------------------------------------------------------------------
+    |
+    | On remote disks (e.g. S3), sign file links with temporaryUrl() so files in
+    | private buckets can be loaded. Links last temporary_url_ttl minutes. When
+    | off, plain disk URLs are used, which needs a public bucket.
+    |
+    */
+    'temporary_urls' => false,
+
+    'temporary_url_ttl' => 30,
+
+    /*
+    |--------------------------------------------------------------------------
     | Private Dynamic Link Middleware
     |--------------------------------------------------------------------------
     |

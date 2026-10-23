@@ -225,7 +225,7 @@ trait Fileable
                         $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
                             $prefix = (new Media($this->disk))->getPrefix($collection);
 
-                            $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($field, $collection, true)))
+                            $isImage = str(Storage::disk($this->disk)->mimeType($prefix.$this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
 
                             if (! $isImage) {
@@ -242,7 +242,7 @@ trait Fileable
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
                         $prefix = (new Media($this->disk))->getPrefix($this->collection);
-                        $isImage = str(Storage::mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
+                        $isImage = str(Storage::disk($this->disk)->mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 
                         if (! $isImage) {
