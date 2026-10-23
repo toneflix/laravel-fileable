@@ -16,7 +16,14 @@ beforeEach(function () {
     Storage::extend('memory', function ($app, $config) {
         $adapter = new InMemoryFilesystemAdapter;
 
-        return new FilesystemAdapter(new Filesystem($adapter, $config), $adapter, $config);
+        // The memory adapter has no URLs of its own, so build them from the disk's "url" like S3 does.
+        return new class(new Filesystem($adapter, $config), $adapter, $config) extends FilesystemAdapter
+        {
+            public function url($path)
+            {
+                return rtrim($this->config['url'], '/').'/'.ltrim($path, '/');
+            }
+        };
     });
 
     config()->set('filesystems.disks.remote', [

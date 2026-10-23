@@ -220,8 +220,12 @@ class Media
         $src = Initiator::base64urlDecode($file);
         $path = str($src)->trim('/')->before('/');
         $namespace = $this->namespaces['private'] ?? [];
-        $key = collect($namespace)->search(fn ($item) => str($item['path'] ?? '')->contains($path)) ?: 'files';
-        $this->setCollectionDisk('private.'.$key);
+        $key = collect($namespace)->search(fn ($item) => str($item['path'] ?? '')->contains($path));
+
+        // Files outside the private collections (e.g. avatars) stay on the default disk.
+        if ($key !== false) {
+            $this->setCollectionDisk('private.'.$key);
+        }
 
         $headers = [
             'Cross-Origin-Resource-Policy' => 'cross-origin',
