@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 3.1.0 - 2026-10-24
+
+### What's Changed
+
+* feat: support remote disks like S3 by @3m1n3nc3 in https://github.com/toneflix/laravel-fileable/pull/44
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/3.0.0...3.1.0
+
 ## 3.0.2 - 2026-05-12
 
 ### What's Changed
