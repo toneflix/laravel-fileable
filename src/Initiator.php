@@ -46,6 +46,18 @@ class Initiator
         }
 
         if ($disk && ! $disk->getAdapter() instanceof LocalFilesystemAdapter) {
+            // Private buckets need signed links; public ones can use plain URLs.
+            if (config('toneflix-fileable.temporary_urls', false)) {
+                try {
+                    return $disk->temporaryUrl(
+                        $url,
+                        now()->addMinutes((int) config('toneflix-fileable.temporary_url_ttl', 30))
+                    );
+                } catch (\RuntimeException) {
+                    // The disk can't sign URLs, fall back to a plain one.
+                }
+            }
+
             return $disk->url($url);
         }
 

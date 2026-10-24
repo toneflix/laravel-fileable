@@ -134,14 +134,14 @@ class Media
             }
 
             if ($returnPath === true) {
-                return Initiator::asset($getPath.$default, true, $this->disk);
+                return $getPath.$default;
             }
 
             return Initiator::asset($getPath.$default, false, $this->disk);
         }
 
         if ($returnPath === true) {
-            return Initiator::asset($getPath.$src, true, $this->disk);
+            return $getPath.$src;
         } elseif (str($type)->contains('private.')) {
             $secure = Arr::get($this->namespaces, $type.'.secure', false) === true ? 'secure' : 'open';
 
@@ -220,13 +220,21 @@ class Media
         $src = Initiator::base64urlDecode($file);
         $path = str($src)->trim('/')->before('/');
         $namespace = $this->namespaces['private'] ?? [];
-        $key = collect($namespace)->search(fn ($item) => str($item['path'] ?? '')->contains($path)) ?: 'files';
-        $this->setCollectionDisk('private.'.$key);
+        $key = collect($namespace)->search(fn ($item) => str($item['path'] ?? '')->contains($path));
+
+        // Files outside the private collections (e.g. avatars) stay on the default disk.
+        if ($key !== false) {
+            $this->setCollectionDisk('private.'.$key);
+        }
 
         $headers = [
             'Cross-Origin-Resource-Policy' => 'cross-origin',
             'Access-Control-Allow-Origin' => '*',
         ];
+
+        if ($this->disk->fileExists($src) && ! $this->isLocal()) {
+            return $this->remoteResponse($src, $headers);
+        }
 
         if ($this->disk->fileExists($src)) {
             if (in_array($this->disk->mimeType($src), config('toneflix-fileable.streamable_mimes', []))) {
@@ -304,29 +312,33 @@ class Media
                 $this->fileNamePattern ?? '000000000-000000000'
             ).'.'.$requestFile->extension();
 
-            $this->disk->putFileAs(
-                $prefix.$getPath, // Path
-                $requestFile, // Request File
-                $new_name // Directory
-            );
+            $mime = (string) $requestFile->getMimeType();
+            $size = Arr::get($this->namespaces, $type.'.size');
+            $options = $this->writeOptions($type);
+
+            // Images with a configured size are resized before they are stored,
+            // so this works the same on local and remote (e.g. S3) disks.
+            if ($size && str($mime)->contains('image') && ! str($mime)->contains('svg')) {
+                $image = $this->imageDriver->read($requestFile->getRealPath())
+                    ->cover(Arr::first($size), Arr::last($size));
+
+                $this->disk->put(
+                    $prefix.$getPath.$new_name,
+                    (string) $image->encodeByMediaType($mime),
+                    $options
+                );
+            } else {
+                $this->disk->putFileAs(
+                    $prefix.$getPath, // Path
+                    $requestFile, // Request File
+                    $new_name, // File name
+                    $options
+                );
+            }
 
             // Reset the file instance
             if (is_string($file_name)) {
                 $request->offsetUnset($file_name);
-            }
-
-            // If the file is an image resize it
-            $size = Arr::get($this->namespaces, $type.'.size');
-
-            $mime = $requestFile->getMimeType();
-
-            $size = Arr::get($this->namespaces, $type.'.size');
-
-            // If the file is an image resize it if size is available
-            if ($size && str($mime)->contains('image')) {
-                $this->imageDriver->read($this->disk->path($prefix.$getPath.$new_name))
-                    ->cover(Arr::first($size), Arr::last($size))
-                    ->save();
             }
 
             if ($this->getOriginalName) {
@@ -553,6 +565,48 @@ class Media
         }
 
         return $path;
+    }
+
+    /**
+     * Whether the current disk stores files on this server.
+     */
+    public function isLocal(): bool
+    {
+        return $this->disk->getAdapter() instanceof LocalFilesystemAdapter;
+    }
+
+    /**
+     * Serve a file from a remote disk (e.g. S3). Redirects to a short-lived
+     * signed URL when the disk can make one, so the storage service handles
+     * range requests for audio and video, and streams the file otherwise.
+     */
+    protected function remoteResponse(string $src, array $headers = [])
+    {
+        // Object keys have no leading slash
+        $src = ltrim($src, '/');
+
+        try {
+            $url = $this->disk->temporaryUrl(
+                $src,
+                now()->addMinutes((int) config('toneflix-fileable.temporary_url_ttl', 30))
+            );
+
+            return redirect()->away($url)->withHeaders($headers);
+        } catch (\RuntimeException) {
+            return $this->disk->response($src, null, $headers);
+        }
+    }
+
+    /**
+     * Options for writing a file to the disk, from the collection's "visibility" setting.
+     *
+     * @return array<string, string>
+     */
+    protected function writeOptions(string $type): array
+    {
+        $visibility = Arr::get($this->namespaces, $type.'.visibility');
+
+        return $visibility ? ['visibility' => $visibility] : [];
     }
 
     /**
