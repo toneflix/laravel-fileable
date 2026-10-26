@@ -19,9 +19,40 @@ beforeEach(function () {
         // The memory adapter has no URLs of its own, so build them from the disk's "url" like S3 does.
         return new class(new Filesystem($adapter, $config), $adapter, $config) extends FilesystemAdapter
         {
+            /** Lookups made against the disk, like the requests S3 would get. */
+            public array $lookups = [];
+
             public function url($path)
             {
                 return rtrim($this->config['url'], '/').'/'.ltrim($path, '/');
+            }
+
+            public function exists($path)
+            {
+                $this->lookups[] = "exists:$path";
+
+                return parent::exists($path);
+            }
+
+            public function fileExists($path)
+            {
+                $this->lookups[] = "fileExists:$path";
+
+                return parent::fileExists($path);
+            }
+
+            public function mimeType($path)
+            {
+                $this->lookups[] = "mimeType:$path";
+
+                return parent::mimeType($path);
+            }
+
+            public function size($path)
+            {
+                $this->lookups[] = "size:$path";
+
+                return parent::size($path);
             }
         };
     });
@@ -50,8 +81,35 @@ test('remote files get disk URLs and plain paths', function () {
     $name = $media->save('avatar', UploadedFile::fake()->image('avatar.jpg'));
 
     expect($media->getMedia('avatar', $name))->toBe('https://bucket.test/avatars/'.$name)
-        ->and($media->getMedia('avatar', $name, true))->toBe('avatars/'.$name)
-        ->and($media->mediaInfo('avatar', $name)['size'])->toBeGreaterThan(0);
+        ->and($media->getMedia('avatar', $name, true))->toBe('avatars/'.$name);
+});
+
+test('remote file links are built without asking the disk', function () {
+    $media = new Media;
+
+    expect($media->getMedia('avatar', 'missing.jpg'))->toBe('https://bucket.test/avatars/missing.jpg')
+        ->and($media->getMedia('avatar', 'missing.jpg', true))->toBe('avatars/missing.jpg');
+
+    $info = $media->mediaInfo('avatar', 'missing.jpg');
+
+    expect($info['url'])->toBe('https://bucket.test/avatars/missing.jpg')
+        ->and($info['dynamicLink'])->toBe('https://bucket.test/avatars/missing.jpg')
+        ->and($info['mime'])->toBe('image/jpeg')
+        ->and($info['isImage'])->toBeTrue()
+        ->and($info['size'])->toBe(0);
+
+    expect(Storage::disk('remote')->lookups)->toBe([]);
+});
+
+test('private remote files link straight to a signed url', function () {
+    Storage::disk('remote')->buildTemporaryUrlsUsing(
+        fn ($path) => 'https://bucket.test/'.$path.'?signed=1'
+    );
+
+    $media = new Media;
+
+    expect($media->getMedia('private.images', 'photo.jpg'))->toBe('https://bucket.test/files/images/photo.jpg?signed=1')
+        ->and($media->mediaInfo('avatar', 'photo.jpg')['secureLink'])->toBe('https://bucket.test/avatars/photo.jpg?signed=1');
 });
 
 test('remote files are signed when temporary urls are on', function () {

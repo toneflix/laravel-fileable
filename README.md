@@ -110,7 +110,9 @@ Collections can be stored on any Laravel disk, including `s3`. On remote disks:
 
 - Images are resized before they are uploaded.
 - Links come from the disk's `url()`, or from `temporaryUrl()` when `temporary_urls` is `true` (use this for private buckets). `temporary_url_ttl` sets how many minutes signed links last.
-- Dynamic and secure file routes redirect to a short-lived signed URL when the disk supports it, so the storage service handles range requests for audio and video, and stream the file otherwise.
+- Building links never calls the disk. Stored file names are trusted, so a missing file gets a link instead of the collection's default, and `mediaInfo()` reads the mime type from the extension and reports a `size` of `0`. `exists()` still asks the disk.
+- `mediaInfo()`'s `dynamicLink` is the file's disk link and `secureLink` is always signed. Files in `private.*` collections link to a signed URL instead of the package routes.
+- The dynamic and secure file routes still work for older links: they redirect to a signed URL when the disk supports it and stream the file otherwise.
 
 ### Image Sizes
 
