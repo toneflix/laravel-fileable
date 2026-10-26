@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-fileable` will be documented in this file
 
+## 3.1.1 - 2026-10-26
+
+### What's Changed
+
+* feat: link remote files straight from the disk without existence checks by @3m1n3nc3 in https://github.com/toneflix/laravel-fileable/pull/45
+
+**Full Changelog**: https://github.com/toneflix/laravel-fileable/compare/3.1.0...3.1.1
+
 ## 3.1.0 - 2026-10-24
 
 ### What's Changed
