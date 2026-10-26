@@ -5,7 +5,6 @@ namespace Toneflix\LaravelFileable\Traits;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Storage;
 use Toneflix\LaravelFileable\Events\FileSaved;
 use Toneflix\LaravelFileable\Media;
 
@@ -223,9 +222,10 @@ trait Fileable
                     $images = [];
                     foreach ($this->file_field as $field => $collection) {
                         $images[$field] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($field, $collection) {
-                            $prefix = (new Media($this->disk))->getPrefix($collection);
+                            $media = new Media($this->disk);
+                            $prefix = $media->getPrefix($collection);
 
-                            $isImage = str(Storage::disk($this->disk)->mimeType($prefix.$this->retrieveFile($field, $collection, true)))
+                            $isImage = str($media->mimeType($prefix.$this->retrieveFile($field, $collection, true)))
                                 ->contains('image');
 
                             if (! $isImage) {
@@ -241,8 +241,9 @@ trait Fileable
                     return $images;
                 } else {
                     return collect($this->sizes)->mapWithKeys(function ($size, $key) {
-                        $prefix = (new Media($this->disk))->getPrefix($this->collection);
-                        $isImage = str(Storage::disk($this->disk)->mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
+                        $media = new Media($this->disk);
+                        $prefix = $media->getPrefix($this->collection);
+                        $isImage = str($media->mimeType($prefix.$this->retrieveFile($this->file_field, $this->collection, true)))
                             ->contains('image');
 
                         if (! $isImage) {

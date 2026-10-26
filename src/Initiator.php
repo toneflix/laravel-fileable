@@ -37,9 +37,10 @@ class Initiator
     }
 
     /**
-     * Load public asset
+     * Load public asset. On remote disks the link is signed when $signed is true
+     * or the temporary_urls config is on.
      */
-    public static function asset(string $url, $absolute = false, ?Filesystem $disk = null): string
+    public static function asset(string $url, $absolute = false, ?Filesystem $disk = null, bool $signed = false): string
     {
         if (filter_var($url, FILTER_VALIDATE_URL)) {
             return $url;
@@ -47,7 +48,7 @@ class Initiator
 
         if ($disk && ! $disk->getAdapter() instanceof LocalFilesystemAdapter) {
             // Private buckets need signed links; public ones can use plain URLs.
-            if (config('toneflix-fileable.temporary_urls', false)) {
+            if ($signed || config('toneflix-fileable.temporary_urls', false)) {
                 try {
                     return $disk->temporaryUrl(
                         $url,

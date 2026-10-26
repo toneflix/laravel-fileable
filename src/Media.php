@@ -118,14 +118,14 @@ class Media
             return Initiator::asset($url->replace('localhost', request(null)->getHttpHost()), true, $this->disk);
         }
 
-        if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
+        if (! $src || ! $this->stored($prefix.$getPath.$src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
                 if ($returnPath === true) {
                     return parse_url($default, PHP_URL_PATH);
                 }
 
                 return $default;
-            } elseif (! $this->disk->exists($prefix.$getPath.$default)) {
+            } elseif (! $this->stored($prefix.$getPath.$default)) {
                 if ($returnPath === true) {
                     return $this->default_media;
                 }
@@ -142,6 +142,8 @@ class Media
 
         if ($returnPath === true) {
             return $getPath.$src;
+        } elseif (str($type)->contains('private.') && ! $this->isLocal()) {
+            return Initiator::asset($getPath.$src, false, $this->disk, true);
         } elseif (str($type)->contains('private.')) {
             $secure = Arr::get($this->namespaces, $type.'.secure', false) === true ? 'secure' : 'open';
 
@@ -184,10 +186,10 @@ class Media
             return parse_url($src, PHP_URL_PATH);
         }
 
-        if (! $src || ! $this->disk->exists($prefix.$getPath.$src)) {
+        if (! $src || ! $this->stored($prefix.$getPath.$src)) {
             if (filter_var($default, FILTER_VALIDATE_URL)) {
                 return parse_url($default, PHP_URL_PATH);
-            } elseif (! $this->disk->exists($prefix.$getPath.$default)) {
+            } elseif (! $this->stored($prefix.$getPath.$default)) {
                 return $this->default_media;
             }
 
@@ -232,7 +234,7 @@ class Media
             'Access-Control-Allow-Origin' => '*',
         ];
 
-        if ($this->disk->fileExists($src) && ! $this->isLocal()) {
+        if (! $this->isLocal()) {
             return $this->remoteResponse($src, $headers);
         }
 
@@ -288,7 +290,7 @@ class Media
 
         if ($file_name instanceof UploadedFile || $request->hasFile($file_name) || isset($fileList[$fileKey])) {
 
-            if ($old && $this->disk->fileExists($old_path) && $old !== 'default.png') {
+            if ($old && $this->stored($old_path) && $old !== 'default.png') {
                 $this->disk->delete($old_path);
             }
 
@@ -351,7 +353,7 @@ class Media
             // Return the new file name
             return $new_name;
         } elseif ($request->has($file_name)) {
-            if ($old && $this->disk->fileExists($old_path) && $old !== 'default.png') {
+            if ($old && $this->stored($old_path) && $old !== 'default.png') {
                 $this->disk->delete($old_path);
             }
 
@@ -385,7 +387,7 @@ class Media
         $old_path = $prefix.$getPath.$old;
 
         // Delete the old file
-        if ($old && $this->disk->fileExists($old_path) && $old !== 'default.png') {
+        if ($old && $this->stored($old_path) && $old !== 'default.png') {
             $this->disk->delete($old_path);
         }
 
@@ -520,12 +522,18 @@ class Media
             $prefix = $this->getPrefix($type);
             $file_path = $prefix.$this->getMedia($type, $src, true);
 
-            $mime = str($this->disk->fileExists($file_path) ? $this->disk->mimeType($file_path) : 'unknown/unknown');
+            $mime = str($this->mimeType($file_path) ?? 'unknown/unknown');
 
             $file_url = $this->getMedia($type, $src) ?: (new Media)->getDefaultMedia($type);
 
-            $dynamicLink = route('fileable.open.file', Initiator::base64urlEncode($file_path));
-            $secureLink = route('fileable.secure.file', Initiator::base64urlEncode($file_path));
+            if ($this->isLocal()) {
+                $dynamicLink = route('fileable.open.file', Initiator::base64urlEncode($file_path));
+                $secureLink = route('fileable.secure.file', Initiator::base64urlEncode($file_path));
+            } else {
+                // Remote files are linked straight from the disk; the secure link is always signed.
+                $dynamicLink = $file_url;
+                $secureLink = Initiator::asset(ltrim($file_path, '/'), false, $this->disk, true);
+            }
         }
 
         $isImage = $mime->contains('image');
@@ -539,7 +547,7 @@ class Media
             'ext' => str($src)->afterLast('.')->toString(),
             'type' => $mediaType,
             'mime' => $mime->toString(),
-            'size' => $mime->isNotEmpty() && $this->disk->fileExists($file_path) ? $this->disk->size($file_path) : 0,
+            'size' => $this->isLocal() && $this->disk->fileExists($file_path) ? $this->disk->size($file_path) : 0,
             'path' => $file_path,
             'isImage' => $isImage,
             'dynamicLink' => $dynamicLink,
@@ -560,11 +568,32 @@ class Media
 
         $path = $prefix.$getPath.$src;
 
-        if ($src && $this->disk->exists($path) && $src !== 'default.png') {
+        if ($src && $this->stored($path) && $src !== 'default.png') {
             $this->disk->delete($path);
         }
 
         return $path;
+    }
+
+    /**
+     * Whether a stored file is there. Remote disks (e.g. S3) are not asked, since every
+     * check is a request to the bucket; the stored file name is trusted instead.
+     */
+    public function stored(string $path): bool
+    {
+        return ! $this->isLocal() || $this->disk->exists($path);
+    }
+
+    /**
+     * The mime type of a stored file. Remote disks give it from the file extension.
+     */
+    public function mimeType(string $path): ?string
+    {
+        if (! $this->isLocal()) {
+            return MimeType::fromFilename($path);
+        }
+
+        return $this->disk->fileExists($path) ? $this->disk->mimeType($path) : null;
     }
 
     /**
